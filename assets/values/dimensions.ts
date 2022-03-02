@@ -5,7 +5,9 @@ const AppDimensions = {
   large: 20,
   medium: 16,
   small: 12,
-  xSmall: 8
+  xSmall: 8,
+
+  fontBold: '700'
 } as const;
 
 

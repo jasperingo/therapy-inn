@@ -4,6 +4,9 @@ import en from './en.json';
 
 declare module 'react-i18next' {
   interface CustomTypeOptions {
-    resources:  typeof en;
+    defaultNS: 'translation';
+    resources: {
+      translation: typeof en;
+    };
   }
 }

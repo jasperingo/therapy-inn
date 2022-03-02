@@ -1,4 +1,35 @@
 {
-  "App_name": "Therapy Inn"
+
+  "App_name": "Therapy Inn",
   
+  "Continue": "Continue",
+
+  "Sign_up": "Sign up",
+
+  "Full_name": "Full name",
+
+  "Phone_number": "Phone number",
+
+  "Verify_phone_number": "Verify phone number",
+
+  "Update_profile": "Update profile",
+
+  "Enter_your_phone_number": "Enter your phone number",
+
+  "Enter_verification_code": "Enter verification code",
+
+  "_verification_code_sent_to_your__phone_number": "A verification code has been sent to {{ number }}",
+
+  "Eg__": "Eg: {{ number }}",
+
+  "_phone_number_required": "Your phone number is required",
+
+  "_phone_number_invalid": "This phone number is invalid",
+
+  "_verification_code_invalid": "This verification code is invalid",
+
+  "No_network_connection": "No network connection",
+
+  "_unknown_error_occured": "An unknown error occured"
+
 }
