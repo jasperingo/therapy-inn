@@ -17,7 +17,7 @@ const styles = StyleSheet.create({
 
 const ChatsScreen = () => {
 
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Chats'>>();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Main'>>();
 
   return (
     <View style={styles.container}>

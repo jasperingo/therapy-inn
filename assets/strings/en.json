@@ -13,10 +13,14 @@
   "Verify_phone_number": "Verify phone number",
 
   "Update_profile": "Update profile",
+  
+  "Choose_photo": "Choose photo",
 
   "Enter_your_phone_number": "Enter your phone number",
 
   "Enter_verification_code": "Enter verification code",
+
+  "Verification_code_has_expired": "Verification code has expired",
 
   "_verification_code_sent_to_your__phone_number": "A verification code has been sent to {{ number }}",
 
@@ -25,6 +29,8 @@
   "_phone_number_required": "Your phone number is required",
 
   "_phone_number_invalid": "This phone number is invalid",
+
+  "This_field_is_required": "This field is required",
 
   "_verification_code_invalid": "This verification code is invalid",
 

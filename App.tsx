@@ -4,7 +4,7 @@ import i18n from './assets/strings/i18next.config';
 import { createNativeStackNavigator, NativeStackNavigationOptions } from '@react-navigation/native-stack';
 import { NavigationContainer, DefaultTheme, Theme, NavigatorScreenParams  } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import MainScreens from './screens/MainScreens';
+import MainScreens, { MainTabParamList } from './screens/MainScreens';
 import AppColors from './assets/values/colors';
 import AuthScreens, { AuthTabParamList } from './screens/Auth/AuthScreens';
 
@@ -27,7 +27,7 @@ const screenOptions: NativeStackNavigationOptions = {
 };
 
 export type RootStackParamList = {
-  Chats: undefined;
+  Main: NavigatorScreenParams<MainTabParamList>;
   Auth: NavigatorScreenParams<AuthTabParamList>;
 };
 

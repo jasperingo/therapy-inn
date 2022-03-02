@@ -11,6 +11,11 @@ import { useTranslation } from 'react-i18next';
 
 const Tab = createBottomTabNavigator();
 
+export type MainTabParamList = {
+  Articles: undefined;
+  Chats: undefined;
+};
+
 const MainScreens = () => {
 
   const { t } = useTranslation();

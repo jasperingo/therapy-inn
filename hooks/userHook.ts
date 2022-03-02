@@ -6,3 +6,6 @@ export const useAuthUser = ()=> {
   const auth = getAuth(firebaseApp);
   return auth.currentUser;
 }
+
+
+
