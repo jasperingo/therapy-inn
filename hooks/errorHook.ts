@@ -13,6 +13,9 @@ export const useErrorMessage = () => {
       case 'auth/code-expired':
         return t('Verification_code_has_expired');
 
+      case 'photo_permission_denied':
+        return t('_photo_permission_not_granted');
+
       default:
         return t('_unknown_error_occured');
     }

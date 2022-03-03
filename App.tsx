@@ -1,12 +1,16 @@
-import React from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import i18n from './assets/strings/i18next.config';
 import { createNativeStackNavigator, NativeStackNavigationOptions } from '@react-navigation/native-stack';
 import { NavigationContainer, DefaultTheme, Theme, NavigatorScreenParams  } from '@react-navigation/native';
+import * as SplashScreen from 'expo-splash-screen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import MainScreens, { MainTabParamList } from './screens/MainScreens';
+import MainScreens, { MainTabParamList } from './screens/Main/MainScreens';
 import AppColors from './assets/values/colors';
 import AuthScreens, { AuthTabParamList } from './screens/Auth/AuthScreens';
+import UserReducer from './context/UserReducer';
+import AppContext from './context/AppContext';
+import { useAuthUserFetch } from './hooks/userHook';
 
 const Stack = createNativeStackNavigator();
 
@@ -31,7 +35,46 @@ export type RootStackParamList = {
   Auth: NavigatorScreenParams<AuthTabParamList>;
 };
 
-const App = ()=> {
+const ReadyApp = () => {
+
+  const authUserFetch = useAuthUserFetch();
+
+  const [appIsReady, setAppIsReady] = useState(false);
+
+  useEffect(
+    () => {
+      (async ()=> {
+        try {
+
+          if (appIsReady) return;
+          
+          await SplashScreen.preventAutoHideAsync();
+
+          const ready = await authUserFetch();
+
+          setAppIsReady(ready);
+
+        } catch (error) {
+          setAppIsReady(true);
+          console.error(error);
+        }
+      })();
+    }, 
+    [appIsReady, authUserFetch]
+  );
+
+  useEffect(
+    () => {
+      if (appIsReady) {
+        (async ()=> await SplashScreen.hideAsync())();
+      }
+    },
+    [appIsReady]
+  );
+
+  if (!appIsReady) {
+    return null;
+  }
 
   return (
     <SafeAreaProvider>
@@ -43,6 +86,21 @@ const App = ()=> {
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
+  );
+}
+
+const App = ()=> {
+
+  const [user, userDispatch] = useReducer(UserReducer, null);
+
+  return (
+    <AppContext.Provider value={{
+      user,
+      userDispatch
+    }}
+    >
+      <ReadyApp />
+    </AppContext.Provider>
   );
 }
 

@@ -15,6 +15,10 @@ const styles = StyleSheet.create({
     backgroundColor: AppColors.colorPrimary
   },
 
+  dangerButton: {
+    backgroundColor: AppColors.colorError
+  },
+
   text: {
     textAlign: 'center',
     color: AppColors.colorOnPrimary,
@@ -24,16 +28,17 @@ const styles = StyleSheet.create({
 
 interface Props {
   text: string;
+  danger?: boolean;
   loading: boolean;
   onClick: ()=> void
 }
 
-const UIButton = ({ text, loading, onClick }: Props) => {
+const UIButton = ({ text, loading, danger = false, onClick }: Props) => {
 
   return (
     <View style={styles.container}>
       <TouchableOpacity 
-        style={styles.button} 
+        style={[styles.button, danger ? styles.dangerButton : null]} 
         activeOpacity={0.6}
         onPress={onClick}
         >

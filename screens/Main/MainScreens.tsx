@@ -2,11 +2,13 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import InfoScreen from './InfoScreen';
+import ArticlesScreen from './ArticlesScreen';
 import ChatsScreen from './ChatsScreen';
-import AppColors from '../assets/values/colors';
-import AppDimensions from '../assets/values/dimensions';
+import AppColors from '../../assets/values/colors';
+import AppDimensions from '../../assets/values/dimensions';
 import { useTranslation } from 'react-i18next';
+import ProfileScreen from './ProfileScreen';
+import GetHelpScreen from './GetHelpScreen';
 
 
 const Tab = createBottomTabNavigator();
@@ -14,6 +16,7 @@ const Tab = createBottomTabNavigator();
 export type MainTabParamList = {
   Articles: undefined;
   Chats: undefined;
+  Profile: { id: string }
 };
 
 const MainScreens = () => {
@@ -31,8 +34,14 @@ const MainScreens = () => {
             case  'Articles': 
               iconName = 'newspaper';
               break;
+            case 'GetHelp':
+              iconName = 'heart';
+              break;
             case 'Chats':
               iconName = 'chatbubble';
+              break;
+            case 'Profile':
+              iconName = 'person';
               break;
 
             default:
@@ -54,8 +63,10 @@ const MainScreens = () => {
         headerTintColor: AppColors.colorOnPrimary
       })}
       >
-      <Tab.Screen name="Articles" component={InfoScreen} options={{ title: t('App_name') }} />
+      <Tab.Screen name="Articles" component={ArticlesScreen} options={{ headerShown: false, tabBarLabel: t('Articles') }} />
+      <Tab.Screen name="GetHelp" component={GetHelpScreen} options={{ title: t('Get_help'), tabBarLabel: t('Get_help') }} />
       <Tab.Screen name="Chats" component={ChatsScreen} />
+      <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
 }

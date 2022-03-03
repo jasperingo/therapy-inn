@@ -1,43 +1,50 @@
+import { FirebaseError } from "firebase/app";
 import { getAuth, updateProfile, User } from "firebase/auth";
-import { set, ref , getDatabase } from "firebase/database";
+import { set, ref , getDatabase, get, child } from "firebase/database";
 import { getStorage, ref as StorageRef, uploadBytes  } from "firebase/storage";
+import AppUser from '../models/User';
+import ERRORS from "../assets/values/errors";
 import firebaseApp from "./firebase.config";
 
 const UserRepository = {
 
-  async create(displayName: string, photoURL: string, upload: boolean) {
+  async create({ phoneNumber, therapist, displayName, photoURL, createdAt }: AppUser, photoBlob: Blob | null) {
 
     const auth = getAuth(firebaseApp);
 
-    const storage = getStorage();
+    if (photoBlob !== null) {
+      
+      const storage = getStorage();
 
-    const userPhotoURL = `users/${auth.currentUser?.uid}.${photoURL.split('.').pop()}`;
+      const mountainsRef = StorageRef(storage, photoURL);
 
-    if (upload) {
-
-      const resForBlob = await fetch(photoURL);
-
-      const blob = await resForBlob.blob();
-    
-      const mountainsRef = StorageRef(storage, userPhotoURL);
-
-      await uploadBytes(mountainsRef, blob);
+      await uploadBytes(mountainsRef, photoBlob);
     }
 
-
     await updateProfile(auth.currentUser as User, {
-      displayName,
-      photoURL: userPhotoURL
+      photoURL,
+      displayName
     });
     
     const db = getDatabase(firebaseApp);
 
     return set(ref(db, `users/${auth.currentUser?.uid}`), {
+      photoURL,
+      therapist,
       displayName,
-      photoURL: userPhotoURL,
-      phoneNumber: auth.currentUser?.phoneNumber,
-      createdAt: Date.now()
+      phoneNumber,
+      createdAt,
     });
+  },
+
+  async get(id: string) {
+    const dbRef = ref(getDatabase());
+    const snapshot = await get(child(dbRef, `users/${id}`));
+    if (snapshot.exists()) {
+      return snapshot.val() as AppUser;
+    } else {
+      throw new FirebaseError(ERRORS.userNotFound, '');
+    }
   }
 
 };

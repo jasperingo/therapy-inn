@@ -1,10 +1,36 @@
 {
 
   "App_name": "Therapy Inn",
+
+  "_welcome": "Welcome to therapy inn",
+
+  "Articles": "Articles",
+
+  "Title": "Title",
+
+  "Link_to_article": "Link to article",
+
+  "Create_article": "Create article",
+
+  "Create": "Create",
+
+  "Get_help": "Get help",
+
+  "Yes": "Yes",
+
+  "No": "No",
   
   "Continue": "Continue",
 
+  "_sign_in_now": "You have to sign in to continue",
+
   "Sign_up": "Sign up",
+
+  "Sign_in": "Sign in",
+
+  "Sign_out": "Sign out",
+
+  "_confirm_sign_out": "Are you sure you want to sign out?",
 
   "Full_name": "Full name",
 
@@ -15,6 +41,8 @@
   "Update_profile": "Update profile",
   
   "Choose_photo": "Choose photo",
+
+  "I_m_a_therapist": "I'm a therapist",
 
   "Enter_your_phone_number": "Enter your phone number",
 
@@ -33,6 +61,14 @@
   "This_field_is_required": "This field is required",
 
   "_verification_code_invalid": "This verification code is invalid",
+
+  "_photo_permission_not_granted": "Permission to access camera roll is required!",
+
+  "_error_while_converting_photo": "An error occured while converting photo",
+
+  "_error_while_loading_photo": "An error occured while loading photo",
+
+  "_error_while_picking_photo": "An error occured while picking photo",
 
   "No_network_connection": "No network connection",
 

@@ -20,6 +20,7 @@
     "expo": "~44.0.0",
     "expo-firebase-recaptcha": "~2.1.0",
     "expo-font": "^10.0.5",
+    "expo-image-picker": "~12.0.1",
     "expo-splash-screen": "^0.14.2",
     "expo-status-bar": "~1.2.0",
     "firebase": "^9.6.7",
@@ -28,6 +29,8 @@
     "react-dom": "17.0.1",
     "react-i18next": "^11.15.5",
     "react-native": "0.64.3",
+    "react-native-check-box": "^2.1.7",
+    "react-native-floating-action": "^1.22.0",
     "react-native-pager-view": "5.4.9",
     "react-native-safe-area-context": "^3.3.2",
     "react-native-screens": "~3.10.1",
@@ -35,13 +38,13 @@
     "react-native-vector-icons": "^9.1.0",
     "react-native-web": "0.17.1",
     "react-native-webview": "^11.15.0",
-    "validator": "^13.7.0",
-    "expo-image-picker": "~12.0.1"
+    "validator": "^13.7.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
     "@types/react": "~17.0.21",
     "@types/react-native": "~0.64.12",
+    "@types/react-native-check-box": "^2.1.2",
     "@types/validator": "^13.7.1",
     "@typescript-eslint/eslint-plugin": "^5.12.1",
     "@typescript-eslint/parser": "^5.12.1",
