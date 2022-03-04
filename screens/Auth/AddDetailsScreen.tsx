@@ -12,7 +12,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
 import { useErrorMessage } from '../../hooks/errorHook';
-import UIPhotoPicker from '../../components/UIPhotoPicker';
+import UIPhotoPicker, { PhotoDefaultTypes } from '../../components/UIPhotoPicker';
 import { usePhotoURIToBlob, usePhotoURLMaker } from '../../hooks/photoHook';
 import UICheckBox from '../../components/UICheckBox';
 
@@ -108,9 +108,10 @@ const AddDetailsScreen = () => {
       
       <UIPhotoPicker 
         photo={photo} 
-        error={photoError} 
+        loading={loading}
+        error={photoError}
         onPhotoPicked={onPickPhoto} 
-        loading={loading} 
+        defaultPhoto={PhotoDefaultTypes.USER}
         />
       
       <UITextInput

@@ -3,11 +3,22 @@ import { useCallback, useState } from "react";
 import ERRORS from "../assets/values/errors";
 import Article from "../models/Article";
 import ArticleRepository from "../repositories/ArticleRepository";
+import { usePhotoURLMaker } from "./photoHook";
 import { useAuthUser } from "./userHook";
 
-export const useArticleCreate = ()=> {
+type CreateReturnTuple = [
+  (title: string, link: string, photoBlob: Blob)=> Promise<void>,
+  boolean,
+  boolean,
+  string | null,
+  ()=> void
+];
+
+export const useArticleCreate = (): CreateReturnTuple => {
 
   const user = useAuthUser();
+
+  const photoURLMaker = usePhotoURLMaker('articles');
 
   const [loading, setLoading] = useState(false);
 
@@ -24,20 +35,25 @@ export const useArticleCreate = ()=> {
   );
 
   const onSubmit = async (title: string, link: string, photoBlob: Blob) => {
-
+    
     setLoading(true);
 
     const article: Article = {
-      id: '',
-      creatdAt: Date.now(),
-      title,
       link,
+      title,
+      id: '',
       photoURL: '',
+      creatdAt: Date.now(),
       userId: user?.uid as string
     }
 
     try {
-      await ArticleRepository.create(article, photoBlob);
+      article.id = await ArticleRepository.create(article);
+
+      article.photoURL = photoURLMaker(article.id, photoBlob.type);
+
+      await ArticleRepository.updatePhoto(article, photoBlob);
+
       setSuccess(true);
     } catch (error) {
       if (error instanceof FirebaseError)

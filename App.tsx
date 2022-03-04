@@ -11,6 +11,8 @@ import AuthScreens, { AuthTabParamList } from './screens/Auth/AuthScreens';
 import UserReducer from './context/UserReducer';
 import AppContext from './context/AppContext';
 import { useAuthUserFetch } from './hooks/userHook';
+import Article from './models/Article';
+import ArticleReducer from './context/ArticleReducer';
 
 const Stack = createNativeStackNavigator();
 
@@ -91,12 +93,18 @@ const ReadyApp = () => {
 
 const App = ()=> {
 
+  const articlesArr: Array<Article> = [];
+
   const [user, userDispatch] = useReducer(UserReducer, null);
+
+  const [articles, articleDispatch] = useReducer(ArticleReducer, articlesArr);
 
   return (
     <AppContext.Provider value={{
       user,
-      userDispatch
+      userDispatch,
+      articles, 
+      articleDispatch
     }}
     >
       <ReadyApp />

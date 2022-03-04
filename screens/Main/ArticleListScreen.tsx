@@ -36,6 +36,7 @@ const ArticleListScreen = () => {
         renderItem={({ item })=> (
           <ArticleItem key={item} />
         )}
+        keyExtractor={(item)=> String(item)}
         />
 
       {
