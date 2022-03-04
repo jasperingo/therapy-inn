@@ -19,4 +19,6 @@ initializeAuth(firebaseApp, {
   persistence: getReactNativePersistence(AsyncStorage)
 });
 
+export const PAGE_LIMIT = 2;
+
 export default firebaseApp;

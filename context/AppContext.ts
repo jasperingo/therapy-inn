@@ -1,8 +1,16 @@
 
 import { createContext } from "react";
-import ContextType from "./AppContextType";
+import AppContextType, { ArticleStateType } from "./AppContextType";
 
-const AppContext = createContext<ContextType | null>(null);
+export const articlestate: ArticleStateType = {
+  list: [],
+  ended: false,
+  loading: false,
+  refreshing: false,
+  page: -1,
+  error: null,
+};
+
+const AppContext = createContext<AppContextType | null>(null);
 
 export default AppContext;
-

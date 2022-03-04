@@ -9,7 +9,7 @@ export interface UserAction {
 
 export interface ArticleAction {
   type: string; 
-  payload: Article; 
+  payload?: Article | Partial<ArticleStateType>; 
 }
 
 export enum UserActionTypes {
@@ -17,9 +17,25 @@ export enum UserActionTypes {
   SIGNED_OUT = 'USER_SIGNED_OUT'
 }
 
+export enum ArticleActionTypes {
+  UNFETCHED = 'ARTICLE_UNFETCHED',
+  FETCHED = 'ARTICLE_FETCHED',
+  CREATED = 'ARTICLE_CREATED',
+  DELETED = 'ARTICLE_DELETED'
+}
+
+export interface ArticleStateType {
+  list: Array<Article>;
+  ended: boolean;
+  loading: boolean;
+  refreshing: boolean;
+  page: number;
+  error: string | null;
+}
+
 export default interface AppContextType {
   user: User | null;
   userDispatch: React.Dispatch<UserAction>;
-  articles: Array<Article>;
+  articles: ArticleStateType;
   articleDispatch: React.Dispatch<ArticleAction>;
 }

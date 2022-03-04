@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next"
+import ERRORS from "../assets/values/errors";
 
 export const useErrorMessage = () => {
   
@@ -15,6 +16,9 @@ export const useErrorMessage = () => {
 
       case 'photo_permission_denied':
         return t('_photo_permission_not_granted');
+
+      case ERRORS.noInternetConnection:
+        return t('No_network_connection');
 
       default:
         return t('_unknown_error_occured');

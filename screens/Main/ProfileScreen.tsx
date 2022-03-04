@@ -90,8 +90,8 @@ const ProfileScreen = () => {
   
   const onSignOutClicked = () => {
     Alert.alert(
+      t('Confirm'),
       t('_confirm_sign_out'),
-      undefined,
       [
         {
           text: t('No'),

@@ -8,6 +8,7 @@ const AppColors = {
   colorOnSurface: 'rgb(0, 0, 0)',
   colorError: 'rgb(255, 0, 0)',
   colorLink: '#6495ED',
+  colorGray: '#808080',
 } as const;
 
 export default AppColors;

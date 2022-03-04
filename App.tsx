@@ -1,4 +1,5 @@
 import React, { useEffect, useReducer, useState } from 'react';
+import { LogBox } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import i18n from './assets/strings/i18next.config';
 import { createNativeStackNavigator, NativeStackNavigationOptions } from '@react-navigation/native-stack';
@@ -9,10 +10,11 @@ import MainScreens, { MainTabParamList } from './screens/Main/MainScreens';
 import AppColors from './assets/values/colors';
 import AuthScreens, { AuthTabParamList } from './screens/Auth/AuthScreens';
 import UserReducer from './context/UserReducer';
-import AppContext from './context/AppContext';
+import AppContext, { articlestate } from './context/AppContext';
 import { useAuthUserFetch } from './hooks/userHook';
-import Article from './models/Article';
 import ArticleReducer from './context/ArticleReducer';
+
+LogBox.ignoreLogs(['Setting a timer for a long period of time'])
 
 const Stack = createNativeStackNavigator();
 
@@ -93,11 +95,9 @@ const ReadyApp = () => {
 
 const App = ()=> {
 
-  const articlesArr: Array<Article> = [];
-
   const [user, userDispatch] = useReducer(UserReducer, null);
 
-  const [articles, articleDispatch] = useReducer(ArticleReducer, articlesArr);
+  const [articles, articleDispatch] = useReducer(ArticleReducer, articlestate);
 
   return (
     <AppContext.Provider value={{

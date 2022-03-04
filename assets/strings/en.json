@@ -8,9 +8,17 @@
 
   "Title": "Title",
 
+  "Confirm": "Confirm",
+
   "Link_to_article": "Link to article",
 
   "Create_article": "Create article",
+
+  "Read_article": "Read article",
+
+  "No_article_found": "No article found",
+
+  "_confirm_delete_article": "Are you sure you want to delete this article?",
 
   "Create": "Create",
 

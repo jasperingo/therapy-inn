@@ -5,7 +5,11 @@ const ERRORS = {
 
   signOutFailed: 'SIGN_OUT_FAILED',
 
-  unknown: 'UNKNOWN_ERROR'
+  unknown: 'UNKNOWN_ERROR',
+
+  noInternetConnection: 'NO_INTERNET_CONNECTION',
+
+  
 
 } as const;
 
