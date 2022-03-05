@@ -35,7 +35,9 @@ const ChatsScreen = () => {
         data={[1, 2, 3, 4, 5]}
         style={styles.list}
         renderItem={()=> (
-          <ChatItem />
+          <ChatItem 
+            onClick={()=> navigation.navigate('Messages')}
+            />
         )}
         keyExtractor={(item)=> String(item)}
         />

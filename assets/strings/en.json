@@ -4,6 +4,8 @@
 
   "_welcome": "Welcome to therapy inn",
 
+  "All_set_let_s_go": "All set, let's go.",
+
   "Articles": "Articles",
 
   "Title": "Title",
@@ -61,6 +63,8 @@
   "_verification_code_sent_to_your__phone_number": "A verification code has been sent to {{ number }}",
 
   "Eg__": "Eg: {{ number }}",
+
+  "Enter_your_message": "Enter your message",
 
   "_phone_number_required": "Your phone number is required",
 

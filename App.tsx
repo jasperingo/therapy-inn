@@ -1,18 +1,19 @@
-import React, { useEffect, useReducer, useState } from 'react';
+import React, { useReducer } from 'react';
 import { LogBox } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import i18n from './assets/strings/i18next.config';
 import { createNativeStackNavigator, NativeStackNavigationOptions } from '@react-navigation/native-stack';
 import { NavigationContainer, DefaultTheme, Theme, NavigatorScreenParams  } from '@react-navigation/native';
-import * as SplashScreen from 'expo-splash-screen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import MainScreens, { MainTabParamList } from './screens/Main/MainScreens';
 import AppColors from './assets/values/colors';
 import AuthScreens, { AuthTabParamList } from './screens/Auth/AuthScreens';
 import UserReducer from './context/UserReducer';
 import AppContext, { articlestate } from './context/AppContext';
-import { useAuthUserFetch } from './hooks/userHook';
 import ArticleReducer from './context/ArticleReducer';
+import SplashScreen from './screens/SplashScreen';
+import MessagesScreen from './screens/MessagesScreen';
+import ChatHeader from './components/ChatHeader';
 
 LogBox.ignoreLogs(['Setting a timer for a long period of time'])
 
@@ -35,63 +36,11 @@ const screenOptions: NativeStackNavigationOptions = {
 };
 
 export type RootStackParamList = {
+  Splash: undefined;
+  Messages: undefined;
   Main: NavigatorScreenParams<MainTabParamList>;
   Auth: NavigatorScreenParams<AuthTabParamList>;
 };
-
-const ReadyApp = () => {
-
-  const authUserFetch = useAuthUserFetch();
-
-  const [appIsReady, setAppIsReady] = useState(false);
-
-  useEffect(
-    () => {
-      (async ()=> {
-        try {
-
-          if (appIsReady) return;
-          
-          await SplashScreen.preventAutoHideAsync();
-
-          const ready = await authUserFetch();
-
-          setAppIsReady(ready);
-
-        } catch (error) {
-          setAppIsReady(true);
-          console.error(error);
-        }
-      })();
-    }, 
-    [appIsReady, authUserFetch]
-  );
-
-  useEffect(
-    () => {
-      if (appIsReady) {
-        (async ()=> await SplashScreen.hideAsync())();
-      }
-    },
-    [appIsReady]
-  );
-
-  if (!appIsReady) {
-    return null;
-  }
-
-  return (
-    <SafeAreaProvider>
-      <StatusBar style="light" />
-      <NavigationContainer theme={MyTheme}>
-        <Stack.Navigator screenOptions={screenOptions}>
-          <Stack.Screen name="Main" component={MainScreens} />
-          <Stack.Screen name="Auth" component={AuthScreens} />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </SafeAreaProvider>
-  );
-}
 
 const App = ()=> {
 
@@ -107,7 +56,26 @@ const App = ()=> {
       articleDispatch
     }}
     >
-      <ReadyApp />
+      <SafeAreaProvider>
+        <StatusBar style="light" />
+        <NavigationContainer theme={MyTheme}>
+          <Stack.Navigator screenOptions={screenOptions}>
+            <Stack.Screen name="Splash" component={SplashScreen} />
+            <Stack.Screen name="Main" component={MainScreens} />
+            <Stack.Screen name="Auth" component={AuthScreens} />
+            <Stack.Screen 
+              name="Messages" 
+              component={MessagesScreen} 
+              options={{ 
+                headerShown: true,
+                headerTitle: ()=> <ChatHeader />,
+                headerTintColor: AppColors.colorOnPrimary
+              }} 
+
+              />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </SafeAreaProvider>
     </AppContext.Provider>
   );
 }

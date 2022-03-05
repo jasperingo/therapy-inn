@@ -1,7 +1,7 @@
 
 import { FirebaseError } from 'firebase/app';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import ERRORS from '../assets/values/errors';
 import AppContextType, { UserActionTypes } from '../context/AppContextType';
 import User from '../models/User';
@@ -15,39 +15,78 @@ export const useAuthUser = ()=> {
 }
 
 export const useAppAuthUser = ()=> {
-  const { user } = useAppContext() as AppContextType;
+  const { user } = useAppContext();
   return user;
 }
 
-export const useAuthUserFetch = () => {
 
-  const { userDispatch } = useAppContext() as AppContextType;
+type UserFetchReturnTuple = [
+  ()=> void,
+  boolean, 
+  boolean, 
+  string | null
+];
 
-  return () => {
-    return new Promise<boolean>((resolve, reject) => {
+export const useAuthUserFetch = (): UserFetchReturnTuple => {
+
+  const { userDispatch } = useAppContext();
+
+  const [loading, setLoading] = useState(false);
+
+  const [success, setSuccess] = useState(false);
+
+  const [error, setError] = useState<string | null>(null);
+
+  const fetch = useCallback(
+    ()=> {
+      setError(null);
+      setSuccess(false);
+      setLoading((old)=> old === false ? true : false);
+    },
+    []
+  );
+
+  useEffect(
+     () => {
+
+      if (!loading) return;
+
       const auth = getAuth(firebaseApp);
-      onAuthStateChanged(
+
+      const unsubscribe = onAuthStateChanged(
         auth, 
         async (user)=> {
+
           if (user === null) {
-            reject('No signed in user');
+            setLoading(false);
+            setSuccess(true);
             return;
           }
+
           try {
             const dbUser = await UserRepository.get(user.uid);
             userDispatch({
               payload: dbUser,
               type: UserActionTypes.FETCHED
             });
-            resolve(true);
+            setLoading(false);
+            setSuccess(true);
           } catch (error) {
-            reject(error);
+            if (error instanceof FirebaseError)
+              setError(error.code);
+            else 
+              setError(ERRORS.unknown);
           }
         },
-        ()=> reject('Fetching auth user failed')
+        ()=> setError(ERRORS.unknown),
       );
-    });
-  }
+
+      return unsubscribe;
+    },
+    [loading, userDispatch]
+  );
+  
+  return [fetch, loading, success, error]
 }
 
 
