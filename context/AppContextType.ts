@@ -9,12 +9,12 @@ export interface UserAction {
 
 export interface ArticleAction {
   type: string; 
-  payload?: Article | Partial<ArticleStateType>; 
+  payload?: Partial<ArticleStateType & { article: Article }>; 
 }
 
 export enum UserActionTypes {
   FETCHED = 'USER_FETCHED',
-  SIGNED_OUT = 'USER_SIGNED_OUT'
+  UNFETCHED = 'USER_UNFETCHED'
 }
 
 export enum ArticleActionTypes {

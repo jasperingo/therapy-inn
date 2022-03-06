@@ -1,4 +1,4 @@
-import { endBefore, getDatabase, limitToLast, onValue, orderByChild, push, query, ref, remove, set } from "firebase/database";
+import { endBefore, get, getDatabase, limitToLast, orderByChild, push, query, ref, remove, set } from "firebase/database";
 import { getStorage, uploadBytes, ref as StorageRef } from "firebase/storage";
 import Article from "../models/Article";
 import firebaseApp, { PAGE_LIMIT } from "./firebase.config";
@@ -38,39 +38,37 @@ const ArticleRepository = {
     });
   },
 
-  getList(page: number, onResult: (result: Array<Article>)=> void, onError: (error: Error)=> void) {
+  async getList(page: number) {
     
     const db = getDatabase();
-    const alertsRef = page === 0 ?
+    const articlesRef = ref(db, 'articles');
+    const orderConstraint = orderByChild('creatdAt');
+    const limitConstraint = limitToLast(PAGE_LIMIT);
+    const articlesQuery = page === 0 ?
       query(
-        ref(db, 'articles'), 
-        orderByChild('creatdAt'),
-        limitToLast(PAGE_LIMIT)
+        articlesRef,
+        orderConstraint,
+        limitConstraint
       )
       :
       query(
-        ref(db, 'articles'), 
-        orderByChild('creatdAt'), 
+        articlesRef,
+        orderConstraint, 
         endBefore(page),
-        limitToLast(PAGE_LIMIT)
+        limitConstraint
       );
     
-    onValue(
-      alertsRef, 
-      (snapshot) => {
-        const result: Array<Article> = [];
-        snapshot.forEach((childSnapshot) => {
-          const childKey = childSnapshot.key;
-          const childData = childSnapshot.val();
-          result.unshift({ ...childData, id: childKey });
-        });
-        onResult(result);
-      }, 
-      onError,
-      {
-        onlyOnce: true
-      }
-    );
+    const snapshots = await get(articlesQuery);
+    
+    const result: Array<Article> = [];
+
+    snapshots.forEach((childSnapshot) => {
+      const childKey = childSnapshot.key;
+      const childData = childSnapshot.val();
+      result.unshift({ ...childData, id: childKey });
+    });
+    
+    return result;
   }
 
 }

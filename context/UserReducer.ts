@@ -6,9 +6,9 @@ const UserReducer = (state: User | null, action: UserAction) => {
   switch(action.type) {
 
     case UserActionTypes.FETCHED:
-      return action.payload as User;
+      return action.payload !== undefined ? action.payload : state;
 
-    case UserActionTypes.SIGNED_OUT:
+    case UserActionTypes.UNFETCHED:
       return null;
 
     default:

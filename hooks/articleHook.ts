@@ -62,7 +62,7 @@ export const useArticleCreate = (): CreateReturnTuple => {
       setSuccess(true);
 
       articleDispatch({
-        payload: article,
+        payload: { article },
         type: ArticleActionTypes.CREATED
       });
 
@@ -102,7 +102,7 @@ export const useArticleDelete = (): DeleteReturnTuple => {
       await ArticleRepository.delete(article);
 
       articleDispatch({
-        payload: article,
+        payload: { article },
         type: ArticleActionTypes.DELETED
       });
 
@@ -167,32 +167,33 @@ export const useArticleFetch = (): FetchReturnType => {
   useEffect(
     () => {
 
-      const fetch = ()=> {
-        ArticleRepository.getList(
-          page,
-          (result)=> {
-            articleDispatch({
-              type: ArticleActionTypes.FETCHED,
-              payload: {
-                list: result,
-                loading: false,
-                refreshing: false,
-                ended: result.length < PAGE_LIMIT,
-                page: result[result.length-1]?.creatdAt
-              }
-            });
-          },
-          (error)=> {
-            articleDispatch({
-              type: ArticleActionTypes.FETCHED,
-              payload: {
-                loading: false,
-                refreshing: false,
-                error: error instanceof FirebaseError ? error.code : ERRORS.unknown
-              }
-            });
-          }
-        );
+      const fetch = async ()=> {
+        try {
+          
+          const result = await ArticleRepository.getList(page);
+          
+          articleDispatch({
+            type: ArticleActionTypes.FETCHED,
+            payload: {
+              list: result,
+              loading: false,
+              refreshing: false,
+              ended: result.length < PAGE_LIMIT,
+              page: result[result.length-1]?.creatdAt
+            }
+          });
+          
+        } catch (error) {
+
+          articleDispatch({
+            type: ArticleActionTypes.FETCHED,
+            payload: {
+              loading: false,
+              refreshing: false,
+              error: error instanceof FirebaseError ? error.code : ERRORS.unknown
+            }
+          });
+        }
       }
 
       if (loading && !ended) fetch();

@@ -4,16 +4,16 @@ import { useTranslation } from 'react-i18next';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 import validator from 'validator';
-import AppDimensions from '../../assets/values/dimensions';
-import UIButton from '../../components/UIButton';
-import UITextInput from '../../components/UITextInput';
-import UIPhotoPicker, { PhotoDefaultTypes } from '../../components/UIPhotoPicker';
-import { useArticleCreate } from '../../hooks/articleHook';
-import { usePhotoURIToBlob } from '../../hooks/photoHook';
-import { useErrorMessage } from '../../hooks/errorHook';
+import AppDimensions from '../assets/values/dimensions';
+import UIButton from '../components/UIButton';
+import UITextInput from '../components/UITextInput';
+import UIPhotoPicker, { PhotoDefaultTypes } from '../components/UIPhotoPicker';
+import { useArticleCreate } from '../hooks/articleHook';
+import { usePhotoURIToBlob } from '../hooks/photoHook';
+import { useErrorMessage } from '../hooks/errorHook';
 import { useNavigation } from '@react-navigation/native';
-import { ArticlesStackParamList } from './ArticlesScreen';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../App';
 
 const styles = StyleSheet.create({
   container: {
@@ -35,7 +35,7 @@ const ArticleCreateScreen = () => {
 
   const errorMessage = useErrorMessage();
 
-  const navigation = useNavigation<NativeStackNavigationProp<ArticlesStackParamList, 'ArticleCreate'>>();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'ArticleCreate'>>();
 
   const [title, setTitle] = useState('');
 
@@ -61,7 +61,7 @@ const ArticleCreateScreen = () => {
     ()=> {
       
       if (success) {
-        navigation.navigate('ArticleList');
+        navigation.navigate('Main', { screen: 'Articles' });
         resetStatus();
       }
 

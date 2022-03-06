@@ -9,7 +9,6 @@ import AppColors from '../../assets/values/colors';
 import { useAppAuthUser } from '../../hooks/userHook';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { ArticlesStackParamList } from './ArticlesScreen';
 import ArticleItem from '../../components/ArticleItem';
 import { useArticleFetch } from '../../hooks/articleHook';
 import { useTranslation } from 'react-i18next';

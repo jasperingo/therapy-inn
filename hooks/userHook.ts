@@ -184,7 +184,7 @@ export const useUserSignOut = (): SignOutReturnTuple => {
     try {
       const auth = getAuth(firebaseApp);
       await auth.signOut();
-      userDispatch({ type: UserActionTypes.SIGNED_OUT });
+      userDispatch({ type: UserActionTypes.UNFETCHED });
       setSuccess(true);
     } catch {
       setError(ERRORS.signOutFailed);

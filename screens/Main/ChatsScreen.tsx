@@ -8,7 +8,6 @@ import AppDimensions from '../../assets/values/dimensions';
 import AuthNow from '../../components/AuthNow';
 import ChatItem from '../../components/ChatItem';
 import { useAppAuthUser } from '../../hooks/userHook';
-import User from '../../models/User';
 
 const styles = StyleSheet.create({
 
@@ -22,7 +21,7 @@ const ChatsScreen = () => {
 
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Main'>>();
 
-  const user = useAppAuthUser() as User;
+  const user = useAppAuthUser();
 
   if (user === null) {
     return <AuthNow onClick={()=> navigation.navigate('Auth', { screen: 'PhoneNumber' })} />;
@@ -34,12 +33,12 @@ const ChatsScreen = () => {
       <FlatList 
         data={[1, 2, 3, 4, 5]}
         style={styles.list}
+        keyExtractor={(item)=> String(item)}
         renderItem={()=> (
           <ChatItem 
             onClick={()=> navigation.navigate('Messages')}
             />
         )}
-        keyExtractor={(item)=> String(item)}
         />
 
     </View>

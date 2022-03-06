@@ -14,6 +14,8 @@ import ArticleReducer from './context/ArticleReducer';
 import SplashScreen from './screens/SplashScreen';
 import MessagesScreen from './screens/MessagesScreen';
 import ChatHeader from './components/ChatHeader';
+import ArticleCreateScreen from './screens/ArticleCreateScreen';
+import AppDimensions from './assets/values/dimensions';
 
 LogBox.ignoreLogs(['Setting a timer for a long period of time'])
 
@@ -38,6 +40,7 @@ const screenOptions: NativeStackNavigationOptions = {
 export type RootStackParamList = {
   Splash: undefined;
   Messages: undefined;
+  ArticleCreate: undefined;
   Main: NavigatorScreenParams<MainTabParamList>;
   Auth: NavigatorScreenParams<AuthTabParamList>;
 };
@@ -64,14 +67,25 @@ const App = ()=> {
             <Stack.Screen name="Main" component={MainScreens} />
             <Stack.Screen name="Auth" component={AuthScreens} />
             <Stack.Screen 
+              name="ArticleCreate" 
+              component={ArticleCreateScreen} 
+              options={{ 
+                headerShown: true,
+                title: i18n.t('Create_article'),
+                headerTintColor: AppColors.colorOnPrimary,
+                headerTitleStyle: {
+                  fontSize: AppDimensions.xLarge,
+                },
+              }} 
+              />
+            <Stack.Screen 
               name="Messages" 
               component={MessagesScreen} 
               options={{ 
                 headerShown: true,
                 headerTitle: ()=> <ChatHeader />,
                 headerTintColor: AppColors.colorOnPrimary
-              }} 
-
+              }}
               />
           </Stack.Navigator>
         </NavigationContainer>

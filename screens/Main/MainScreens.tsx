@@ -57,13 +57,12 @@ const MainScreens = () => {
           height: 60
         },
         headerTitleStyle: {
-          fontSize: AppDimensions.xLarge,
-          color: AppColors.colorOnPrimary,
+          fontSize: AppDimensions.xLarge
         },
         headerTintColor: AppColors.colorOnPrimary
       })}
       >
-      <Tab.Screen name="Articles" component={ArticlesScreen} options={{ headerShown: false, tabBarLabel: t('Articles') }} />
+      <Tab.Screen name="Articles" component={ArticlesScreen} options={{ title: t('App_name'), tabBarLabel: t('Articles') }} />
       <Tab.Screen name="GetHelp" component={GetHelpScreen} options={{ title: t('Get_help'), tabBarLabel: t('Get_help') }} />
       <Tab.Screen name="Chats" component={ChatsScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />

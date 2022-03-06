@@ -28,25 +28,22 @@ const ArticleReducer = (state: ArticleStateType, { type, payload }: ArticleActio
       }
     
     case ArticleActionTypes.CREATED:
-      if (payload !== undefined && 'title' in payload && state.page > -1) {
+      if (payload !== undefined && payload.article !== undefined && state.page > -1) {
         return {
           ...state,
-          page: state.page > 0 ? state.page : payload.creatdAt,
-          list: [payload, ...state.list]
+          page: state.page > 0 ? state.page : payload.article.creatdAt,
+          list: [payload.article, ...state.list]
         };
       } else {
         return state;
       }
 
     case ArticleActionTypes.DELETED:
-      if (payload !== undefined && 'title' in payload) {
         return {
           ...state,
-          list: state.list.filter(i=> i.id !== payload.id)
+          list: state.list.filter(i=> i.id !== payload?.article?.id ?? '')
         };
-      } else {
-        return state;
-      }
+      
 
     default:
       return state;
