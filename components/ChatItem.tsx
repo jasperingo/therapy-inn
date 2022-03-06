@@ -1,8 +1,10 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import AppColors from '../assets/values/colors';
 import AppDimensions from '../assets/values/dimensions';
+import { usePhotoDownloadURL } from '../hooks/photoHook';
+import Chat from '../models/Chat';
 
 const styles = StyleSheet.create({
   container: {
@@ -37,25 +39,58 @@ const styles = StyleSheet.create({
   },
 
   message: {
+    flexGrow: 1,
     color: AppColors.colorGray
   },
 
   date: {
     color: AppColors.colorGray,
     fontSize: AppDimensions.small
+  },
+
+  unread: {
+    borderRadius: 50,
+    width: AppDimensions.small,
+    height: AppDimensions.small,
+    backgroundColor: AppColors.colorPrimary
   }
 });
 
-const ChatItem = ({ onClick }: { onClick: ()=> void }) => {
+const ChatItem = ({ chat, onClick }: { chat: Chat; onClick: ()=> void }) => {
+
+  const getPhotoURL = usePhotoDownloadURL();
+
+  const [photo, setPhoto] = useState('');
+
+  useEffect(
+    ()=> {
+      (async ()=> {
+        if (photo !== '') return;
+        try {
+          setPhoto(await getPhotoURL(chat.recipientPhotoURL));
+        } catch(error) {
+          console.log(error);
+        }
+      })();
+    },
+    [chat.recipientPhotoURL, photo, getPhotoURL]
+  );
+
   return (
     <TouchableOpacity style={styles.container} activeOpacity={0.6} onPress={onClick}>
-      <Image source={require('../assets/photos/user.png')} style={styles.iamge} />
+      <Image source={{ uri: photo || chat.recipientPhotoURL }} style={styles.iamge} />
       <View style={styles.body}>
         <View style={styles.nameDate}>
-          <Text style={styles.name}>Dr. Price Ifeanyi</Text>
-          <Text style={styles.date}>20 Feb 2022</Text>
+          <Text style={styles.name}>{ chat.recipientDisplayName }</Text>
+          <Text style={styles.date}>{ (new Date(chat.date)).toDateString() }</Text>
         </View>
-        <Text style={styles.message}>Hello, how are you</Text>
+        <View style={styles.nameDate}>
+          <Text style={styles.message}>{ chat.message }</Text>
+          {
+            !chat.read && 
+            <Text style={styles.unread}></Text>
+          }
+        </View>
       </View>
     </TouchableOpacity>
   );

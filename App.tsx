@@ -13,7 +13,6 @@ import AppContext, { articlestate } from './context/AppContext';
 import ArticleReducer from './context/ArticleReducer';
 import SplashScreen from './screens/SplashScreen';
 import MessagesScreen from './screens/MessagesScreen';
-import ChatHeader from './components/ChatHeader';
 import ArticleCreateScreen from './screens/ArticleCreateScreen';
 import AppDimensions from './assets/values/dimensions';
 
@@ -39,8 +38,8 @@ const screenOptions: NativeStackNavigationOptions = {
 
 export type RootStackParamList = {
   Splash: undefined;
-  Messages: undefined;
   ArticleCreate: undefined;
+  Messages: { name: string; phoneNumber: string; messagingListId: string; recipientId: string; };
   Main: NavigatorScreenParams<MainTabParamList>;
   Auth: NavigatorScreenParams<AuthTabParamList>;
 };
@@ -83,7 +82,6 @@ const App = ()=> {
               component={MessagesScreen} 
               options={{ 
                 headerShown: true,
-                headerTitle: ()=> <ChatHeader />,
                 headerTintColor: AppColors.colorOnPrimary
               }}
               />

@@ -17,11 +17,11 @@ const styles = StyleSheet.create({
   }
 });
 
-const ChatHeader = () => {
+const ChatHeader = ({ fullName, phoneNumber }: { fullName: string; phoneNumber: string; }) => {
   return (
     <View>
-      <Text style={styles.name}>Dr rice beans</Text>
-      <Text style={styles.number}>09030572411</Text>
+      <Text style={styles.name}>{ fullName }</Text>
+      <Text style={styles.number}>{ phoneNumber }</Text>
     </View>
   );
 }

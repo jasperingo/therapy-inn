@@ -42,6 +42,11 @@ const ChatForm = ({ onSend }: { onSend: (message: string)=> void }) => {
 
   const [message, setMessage] = useState('');
 
+  const send = () => {
+    onSend(message);
+    setMessage('');
+  }
+
   return (
     <View style={styles.inputBox}>
       <TextInput 
@@ -54,7 +59,7 @@ const ChatForm = ({ onSend }: { onSend: (message: string)=> void }) => {
           style={styles.sendButton} 
           activeOpacity={0.6} 
           disabled={message.trim() === ''}
-          onPress={()=> onSend(message)}
+          onPress={send}
           >
           <Ionicons name='send' color={AppColors.colorOnPrimary} style={styles.icon} />
         </TouchableOpacity>
