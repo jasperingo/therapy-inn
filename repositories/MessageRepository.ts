@@ -1,4 +1,4 @@
-import { endBefore, get, getDatabase, limitToLast, orderByChild, push, query, ref, set } from "firebase/database";
+import { endBefore, get, getDatabase, limitToLast, onChildAdded, orderByChild, push, query, ref, set, startAt } from "firebase/database";
 import Chat from "../models/Chat";
 import Message from "../models/Message";
 import firebaseApp, { PAGE_LIMIT } from "./firebase.config";
@@ -6,9 +6,14 @@ import firebaseApp, { PAGE_LIMIT } from "./firebase.config";
 const MessageRepository = {
 
   async create(message: Message, messageingListId?: string) {
-
+    
     const db = getDatabase(firebaseApp);
-    const newMessagesRef = messageingListId === undefined ? push(ref(db, 'messages')) : ref(db, `messages/${messageingListId}`);
+
+    const newMessagesRef = 
+      messageingListId === undefined ? 
+      push(ref(db, 'messages')) : 
+      ref(db, `messages/${messageingListId}`);
+
     const newMessageRef = push(newMessagesRef);
     await set(newMessageRef, message);
 
@@ -26,7 +31,7 @@ const MessageRepository = {
       id: messageingListId ?? newMessagesRef.key
     } as Chat);
     
-    return newMessageRef.key as string;
+    return [newMessageRef.key as string, newMessagesRef.key as string] as [messageId: string, messagingListId: string];
   },
 
   async getList(messageingListId: string, page: number) {
@@ -59,6 +64,23 @@ const MessageRepository = {
     });
     
     return result;
+  },
+
+  getNew(messageingListId: string, onNewMessage: (message: Message)=> void) {
+    const db = getDatabase();
+    const messageListRef = ref(db, `messages/${messageingListId}`);
+    return onChildAdded(
+      query(
+        messageListRef, 
+        orderByChild('date'), 
+        startAt(Date.now())
+      ), 
+      (data) => {
+        const message = data.val() as Message;
+        message.id = data.key as string;
+        onNewMessage(message);
+      }
+    );
   }
 
 };

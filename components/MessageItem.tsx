@@ -4,8 +4,8 @@ import { StyleSheet, Text, View } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import AppColors from '../assets/values/colors';
 import AppDimensions from '../assets/values/dimensions';
+import { useMessageCreate } from '../hooks/messageHook';
 import Message from '../models/Message';
-import MessageRepository from '../repositories/MessageRepository';
 
 const styles = StyleSheet.create({
   container: {
@@ -51,7 +51,7 @@ interface Props {
   index: number;
   message: Message, 
   messagingListId?: string;
-  onSend: (index: number, id: string)=> void 
+  onSend: (index: number, id: string, listId: string)=> void 
 }
 
 const MessageItem = (
@@ -60,27 +60,26 @@ const MessageItem = (
     index, 
     messagingListId, 
     onSend, 
-    message: { content, date, id, senderId, receiverId } 
+    message,
   }: Props
 ) => {
 
+  const creator = useMessageCreate(message.id !== undefined);
+  
   useEffect(
     () => {
-      const send = async () => {
-
-        try {
-          const messageId = await MessageRepository.create({ content, date, senderId, receiverId }, messagingListId);
-          onSend(index, messageId);
-        } catch(error) {
-          console.error(error);
-        }
-
+      const sendMessage = async () => {
+        const response = await creator(message, messagingListId);
+        if (response !== undefined)
+          onSend(index, ...response);
       }
 
-      if (id === undefined) send();
+      if (message.id === undefined) sendMessage();
     },
-    [content, date, id, senderId, index, messagingListId, receiverId, onSend]
+    [message, index, messagingListId, onSend, creator]
   );
+
+  const { content, date, id, senderId } = message;
   
   return (
     <View style={[styles.container, senderId === userId ? styles.outContainer : null]}>

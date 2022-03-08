@@ -93,7 +93,7 @@ const PhoneNumberScreen = () => {
         keyboardType='phone-pad'
         error={phoneNumberError}
         label={t('Enter_your_phone_number')}
-        placeholder={t('Eg__', { number: '0903-057-2411' })}
+        placeholder={t('Eg__', { number: '0903-057-2400' })}
         onChangeText={(value)=> setPhoneNumber(value)}
         />
 

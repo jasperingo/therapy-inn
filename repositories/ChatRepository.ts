@@ -1,4 +1,16 @@
-import { endBefore, get, getDatabase, limitToLast, orderByChild, query, ref } from "firebase/database";
+import { 
+  endBefore, 
+  get, 
+  getDatabase, 
+  limitToLast, 
+  onChildAdded, 
+  onChildChanged, 
+  orderByChild, 
+  query, 
+  ref, 
+  startAt, 
+  update 
+} from "firebase/database";
 import Chat from "../models/Chat";
 import { PAGE_LIMIT } from "./firebase.config";
 import UserRepository from "./UserRepository";
@@ -43,6 +55,57 @@ const ChatRepository = {
     }
     
     return result;
+  },
+
+  update(chat: Chat, userId: string) {
+    const db = getDatabase();
+    const chatListRef = ref(db, `chats/${userId}`);
+    return update(chatListRef, {
+      [chat.recipientId]: {
+        date: chat.date,
+        message: chat.message,
+        read: chat.read,
+        id: chat.id
+      }
+    });
+  },
+
+  getChanged(userId: string, onNewMessage: (chat: Chat)=> void) {
+    const db = getDatabase();
+    const messageListRef = ref(db, `chats/${userId}`);
+    return onChildChanged(
+      query(messageListRef), 
+      async (data) => {
+        const chat = data.val() as Chat;
+        chat.recipientId = data.key as string;
+        const user = await UserRepository.get(chat.recipientId);
+        chat.recipientDisplayName = user.displayName;
+        chat.recipientPhoneNumber = user.phoneNumber;
+        chat.recipientPhotoURL = user.photoURL;
+        onNewMessage(chat);
+      }
+    );
+  },
+
+  getAdded(userId: string, onNewMessage: (chat: Chat)=> void) {
+    const db = getDatabase();
+    const messageListRef = ref(db, `chats/${userId}`);
+    return onChildAdded(
+      query(
+        messageListRef,
+        orderByChild('date'), 
+        startAt(Date.now())
+      ), 
+      async (data) => {
+        const chat = data.val() as Chat;
+        chat.recipientId = data.key as string;
+        const user = await UserRepository.get(chat.recipientId);
+        chat.recipientDisplayName = user.displayName;
+        chat.recipientPhoneNumber = user.phoneNumber;
+        chat.recipientPhotoURL = user.photoURL;
+        onNewMessage(chat);
+      }
+    );
   }
 
 };

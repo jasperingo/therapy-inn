@@ -1,20 +1,17 @@
 
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 import validator from 'validator';
-import NetInfo from '@react-native-community/netinfo';
 import AppColors from '../../assets/values/colors';
 import AppDimensions from '../../assets/values/dimensions';
 import UIButton from '../../components/UIButton';
 import UITextInput from '../../components/UITextInput';
 import { AuthTabParamList } from './AuthScreens';
-import { getAuth, PhoneAuthProvider, signInWithCredential } from 'firebase/auth';
-import firebaseApp from '../../repositories/firebase.config';
-import { FirebaseError } from 'firebase/app';
 import { useErrorMessage } from '../../hooks/errorHook';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useUserSignIn } from '../../hooks/userHook';
 
 const styles = StyleSheet.create({
   container: {
@@ -43,28 +40,34 @@ const VerifyScreen = () => {
 
   const { params: { id, phoneNumber} } = useRoute<RouteProp<AuthTabParamList, 'Verify'>>();
 
-  const [loading, setLoading] = useState(false);
-
   const [code, setCode] = useState('');
 
   const [codeError, setCodeError] = useState('');
 
-  const auth = useMemo(()=> getAuth(firebaseApp), []);
+  const  [
+    onSubmit, 
+    success, 
+    loading, 
+    error,
+    resetStatus
+  ] = useUserSignIn();
 
-  const signIn = async () => {
-    try {
-      const credential = PhoneAuthProvider.credential(id, code);
-      await signInWithCredential(auth, credential);
-      setLoading(false);
-      navigation.navigate('AddDetails');
-    } catch (error) {
-      setLoading(false);
-      if (error instanceof FirebaseError)
-        setCodeError(errorMessage(error.code));
-      else 
-        setCodeError(errorMessage(''));
-    }
-  }
+  useEffect(
+    ()=> {
+      
+      if (success) {
+        navigation.navigate('AddDetails');
+        resetStatus();
+      }
+
+      if (error !== null) {
+        alert(errorMessage(error));
+        resetStatus();
+      }
+
+    },
+    [success, error, navigation, errorMessage, resetStatus]
+  );
 
   const submit = () => {
 
@@ -72,14 +75,7 @@ const VerifyScreen = () => {
       setCodeError(t('_verification_code_invalid'));
     } else {
       setCodeError('');
-      NetInfo.fetch().then(state => {
-        if (!state.isConnected) {
-          alert(t('No_network_connection'));
-        } else {
-          setLoading(true);
-          signIn();
-        }
-      });
+      onSubmit(id, code, phoneNumber);
     }
   }
 
@@ -97,7 +93,7 @@ const VerifyScreen = () => {
         keyboardType='number-pad'
         error={codeError}
         label={t('Enter_verification_code')}
-        placeholder={t('Eg__', { number: '394939' })}
+        placeholder={t('Eg__', { number: '663322' })}
         onChangeText={(value)=> setCode(value)}
         />
 

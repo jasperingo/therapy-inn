@@ -34,13 +34,15 @@ export const useArticleCreate = (): CreateReturnTuple => {
   const resetStatus = useCallback(
     ()=> {
       setError(null);
-      setSuccess(false)
+      setSuccess(false);
     },
     []
   );
 
   const onSubmit = async (title: string, link: string, photoBlob: Blob) => {
     
+    if (loading) return;
+
     setLoading(true);
 
     const article: Article = {
@@ -49,7 +51,7 @@ export const useArticleCreate = (): CreateReturnTuple => {
       id: '',
       photoURL: '',
       creatdAt: Date.now(),
-      userId: user?.uid as string
+      userId: user?.id as string
     }
 
     try {

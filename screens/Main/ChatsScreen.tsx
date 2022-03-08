@@ -10,7 +10,7 @@ import AppDimensions from '../../assets/values/dimensions';
 import ERRORS from '../../assets/values/errors';
 import AuthNow from '../../components/AuthNow';
 import ChatItem from '../../components/ChatItem';
-import { useChatList } from '../../hooks/chatHook';
+import { useChatList, useChatReadUpdate } from '../../hooks/chatHook';
 import { useErrorMessage } from '../../hooks/errorHook';
 import { useAppAuthUser } from '../../hooks/userHook';
 import { useRenderListFooter } from '../../hooks/utilHook';
@@ -37,6 +37,8 @@ const ChatsScreen = () => {
   const errorMessage = useErrorMessage();
 
   const renderFooter = useRenderListFooter();
+
+  const chatReadUpdater = useChatReadUpdate();
 
   const [started, setStarted] = useState(false);
 
@@ -117,15 +119,19 @@ const ChatsScreen = () => {
         renderItem={({ item })=> (
           <ChatItem 
             chat={item}
-            onClick={()=> navigation.navigate(
-              'Messages', 
-              { 
-                name: item.recipientDisplayName, 
-                phoneNumber: item.recipientPhoneNumber,
-                messagingListId: item.id as string,
-                recipientId: item.recipientId
-              }
-            )}
+            onClick={()=> {
+              if (!item.read)
+                chatReadUpdater(item, user.id);
+              navigation.navigate(
+                'Messages', 
+                { 
+                  name: item.recipientDisplayName, 
+                  phoneNumber: item.recipientPhoneNumber,
+                  messagingListId: item.id as string,
+                  recipientId: item.recipientId
+                }
+              );
+            }}
             />
         )}
         onEndReached={getChats}
@@ -140,7 +146,7 @@ const ChatsScreen = () => {
           },
           {
             canRender: page > -1 && list.length === 0,
-            render: ()=> <LoadingEmpty text={t('No_article_found')} />
+            render: ()=> <LoadingEmpty text={t('No_chat_found')} />
           }
         ])}
         />

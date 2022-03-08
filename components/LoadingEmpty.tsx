@@ -8,6 +8,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: AppColors.colorSurface,
     paddingVertical: AppDimensions.xxLarge,
+    marginHorizontal: AppDimensions.medium
   },
   
   text: {

@@ -65,7 +65,8 @@ export const useChatList = (): ListReturnType => {
           setLoading(false);
           setRefreshing(false);
           setList((old)=> old.concat(result));
-          setPage(result[result.length-1]?.date);
+          if (result.length !== 0)
+            setPage(result[result.length-1]?.date);
           setEnded(result.length === 0);
           
         } catch (error) {
@@ -85,7 +86,58 @@ export const useChatList = (): ListReturnType => {
     },
     [user, loading, ended, page]
   );
-  
+
+  useEffect(
+    ()=> {
+      const unsubscribe = ChatRepository.getChanged(user.uid, (chat)=> {
+        
+        setList(oldList => {
+
+          const oldChat = oldList.find(i=> i.id === chat.id);
+
+          if (oldChat !== undefined && oldChat.date < chat.date) {
+            return [chat, ...oldList.filter(i=> i.id !== oldChat.id)];
+          }
+
+          return oldList.map(i => (i.id === chat.id) ? chat : i);
+        });
+      });
+
+      return unsubscribe;
+    },
+    [user]
+  );
+
+  useEffect(
+    ()=> {
+      const unsubscribe = ChatRepository.getAdded(user.uid, (chat)=> {
+        
+        setList(oldList => [chat, ...oldList]);
+
+        setPage(oldPage => oldPage === 0 ? chat.date : oldPage);
+      });
+
+      return unsubscribe;
+    },
+    [user]
+  );
+
   return [fetch, list, loading, page, refreshing, error, onRefresh];
+}
+
+export const useChatReadUpdate = () => {
+
+  return async (chat: Chat, userId: string) => {
+
+    try {
+
+      chat.read = true;
+
+      await ChatRepository.update(chat, userId);
+
+    } catch (error) {
+      console.error(error);
+    }
+  }
 }
 

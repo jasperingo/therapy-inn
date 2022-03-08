@@ -39,7 +39,7 @@ const screenOptions: NativeStackNavigationOptions = {
 export type RootStackParamList = {
   Splash: undefined;
   ArticleCreate: undefined;
-  Messages: { name: string; phoneNumber: string; messagingListId: string; recipientId: string; };
+  Messages: { name: string; phoneNumber: string; messagingListId?: string; recipientId: string; };
   Main: NavigatorScreenParams<MainTabParamList>;
   Auth: NavigatorScreenParams<AuthTabParamList>;
 };

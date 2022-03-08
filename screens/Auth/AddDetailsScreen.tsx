@@ -44,7 +44,7 @@ const AddDetailsScreen = () => {
 
   const [fullNameError, setFullNameError] = useState('');
 
-  const [therapist, setTherapist] = useState(false);
+  const [therapist, setTherapist] = useState(user?.therapist ?? false);
 
   const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
 
@@ -96,7 +96,7 @@ const AddDetailsScreen = () => {
     try {
       const blob = await photoURIToBlob(result);
       setPhotoBlob(blob);
-      const url = photoURLMaker(user?.uid as string, blob.type);
+      const url = photoURLMaker(user?.id as string, blob.type);
       setPhoto(url);
     } catch {
       alert(t('_error_while_converting_photo'));

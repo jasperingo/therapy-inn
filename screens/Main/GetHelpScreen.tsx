@@ -6,6 +6,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { RootStackParamList } from '../../App';
 import AppDimensions from '../../assets/values/dimensions';
 import AuthNow from '../../components/AuthNow';
+import UIButton from '../../components/UIButton';
 import { useAppAuthUser } from '../../hooks/userHook';
 import User from '../../models/User';
 
@@ -28,8 +29,23 @@ const GetHelpScreen = () => {
   return (
     <View style={styles.container}>
       <Text>GetHelpScreen</Text>
+      <UIButton 
+        loading={false} 
+        text="Contact therapist" 
+        onClick={()=> {
+          navigation.navigate(
+            'Messages', 
+            { 
+              name: "Jane", 
+              phoneNumber: "+2349030572400",
+              messagingListId: undefined,
+              recipientId: 'bYnuaDQ2taahsN5xP0TIHldMCOC3'
+            }
+          );
+        }}
+        />
     </View>
-  )
+  );
 }
 
 export default GetHelpScreen;
