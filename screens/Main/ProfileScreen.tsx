@@ -12,8 +12,7 @@ import AuthNow from '../../components/AuthNow';
 import UIButton from '../../components/UIButton';
 import UIPhoto from '../../components/UIPhoto';
 import { useErrorMessage } from '../../hooks/errorHook';
-import { useAppAuthUser, useUserSignOut } from '../../hooks/userHook';
-import User from '../../models/User';
+import { useAuthUser, useUserSignOut } from '../../hooks/userHook';
 
 const styles = StyleSheet.create({
   container: {
@@ -62,7 +61,7 @@ const ProfileScreen = () => {
 
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Main'>>();
 
-  const user = useAppAuthUser() as User;
+  const user = useAuthUser();
 
   const [
     onSignOut, 

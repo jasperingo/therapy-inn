@@ -1,8 +1,8 @@
 import { FirebaseError } from "firebase/app";
-import { User } from "firebase/auth";
 import { useCallback, useEffect, useState } from "react";
 import ERRORS from "../assets/values/errors";
 import Chat from "../models/Chat";
+import User from "../models/User";
 import ChatRepository from "../repositories/ChatRepository";
 import { useAuthUser } from "./userHook";
 
@@ -60,7 +60,7 @@ export const useChatList = (): ListReturnType => {
       const fetch = async ()=> {
         try {
           
-          const result = await ChatRepository.getList(user.uid, page);
+          const result = await ChatRepository.getList(user.id, page);
           
           setLoading(false);
           setRefreshing(false);
@@ -89,7 +89,7 @@ export const useChatList = (): ListReturnType => {
 
   useEffect(
     ()=> {
-      const unsubscribe = ChatRepository.getChanged(user.uid, (chat)=> {
+      const unsubscribe = ChatRepository.getChanged(user.id, (chat)=> {
         
         setList(oldList => {
 
@@ -110,7 +110,7 @@ export const useChatList = (): ListReturnType => {
 
   useEffect(
     ()=> {
-      const unsubscribe = ChatRepository.getAdded(user.uid, (chat)=> {
+      const unsubscribe = ChatRepository.getAdded(user.id, (chat)=> {
         
         setList(oldList => [chat, ...oldList]);
 

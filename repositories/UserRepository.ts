@@ -8,9 +8,7 @@ import firebaseApp from "./firebase.config";
 
 const UserRepository = {
 
-  async update({ phoneNumber, therapist, displayName, photoURL, createdAt }: User, photoBlob: Blob | null) {
-
-    const auth = getAuth(firebaseApp);
+  async update({ id, phoneNumber, therapist, displayName, photoURL, createdAt }: User, photoBlob: Blob | null) {
 
     if (photoBlob !== null) {
       
@@ -23,7 +21,7 @@ const UserRepository = {
     
     const db = getDatabase(firebaseApp);
 
-    return set(ref(db, `users/${auth.currentUser?.uid}`), {
+    return set(ref(db, `users/${id}`), {
       photoURL,
       therapist,
       displayName,
@@ -38,6 +36,7 @@ const UserRepository = {
     const credential = PhoneAuthProvider.credential(verificationId, verificationCode);
     const { user } = await signInWithCredential(auth, credential);
     const snapshot = await get(child(ref(db), `users/${user.uid}`));
+
     if (snapshot.exists()) {
       const oldUser = snapshot.val() as User;
       oldUser.id = snapshot.key as string;

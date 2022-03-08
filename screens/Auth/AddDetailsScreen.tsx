@@ -7,7 +7,7 @@ import NetInfo from '@react-native-community/netinfo';
 import AppDimensions from '../../assets/values/dimensions';
 import UIButton from '../../components/UIButton';
 import UITextInput from '../../components/UITextInput';
-import { useAuthUser, useUserSignUp } from '../../hooks/userHook';
+import { useAuthUser, useUserUpdate } from '../../hooks/userHook';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
@@ -48,7 +48,7 @@ const AddDetailsScreen = () => {
 
   const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
 
-  const [onSubmit, success, loading, error, resetStatus] = useUserSignUp();
+  const [onSubmit, success, loading, error, resetStatus] = useUserUpdate();
   
   useEffect(
     ()=> {
@@ -72,16 +72,18 @@ const AddDetailsScreen = () => {
     if (validator.isEmpty(fullName)) {
       error = true;
       setFullNameError(t('This_field_is_required'));
+    } else {
+      setFullNameError('');
     }
 
     if (validator.isEmpty(photo)) {
       error = true;
       setPhotoError(t('This_field_is_required'));
+    } else {
+      setPhotoError('');
     }
 
     if (!error) {
-      setPhotoError('');
-      setFullNameError('');
       NetInfo.fetch().then(state => {
         if (!state.isConnected) {
           alert(t('No_network_connection'));

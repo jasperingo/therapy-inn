@@ -12,12 +12,12 @@ import ChatForm from '../components/ChatForm';
 import ChatHeader from '../components/ChatHeader';
 import Message from '../models/Message';
 import { useAuthUser } from '../hooks/userHook';
-import { User } from 'firebase/auth';
 import { useRenderListFooter } from '../hooks/utilHook';
 import Loading from '../components/Loading';
 import { useErrorMessage } from '../hooks/errorHook';
 import LoadingError from '../components/LoadingError';
 import { useMessageList } from '../hooks/messageHook';
+import User from '../models/User';
 
 const styles = StyleSheet.create({
   container: {
@@ -64,7 +64,7 @@ const MessagesScreen = () => {
     error, 
     onNewMessage, 
     onMessageSent
-  ] = useMessageList(messagingListId, user.uid);
+  ] = useMessageList(user.id, messagingListId);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -82,7 +82,7 @@ const MessagesScreen = () => {
     const message: Message = {
       content,
       date: Date.now(),
-      senderId: user.uid,
+      senderId: user.id,
       receiverId: recipientId
     };
 
@@ -107,9 +107,9 @@ const MessagesScreen = () => {
         onEndReached={load}
         renderItem={({ item, index })=> (
           <MessageItem 
-            message={item} 
-            userId={user.uid} 
             index={index}
+            message={item} 
+            userId={user.id} 
             onSend={messageSent} 
             messagingListId={messagingListId}
             />

@@ -6,7 +6,7 @@ import NetInfo from "@react-native-community/netinfo";
 import { FloatingAction } from "react-native-floating-action";
 import AppDimensions from '../../assets/values/dimensions';
 import AppColors from '../../assets/values/colors';
-import { useAppAuthUser } from '../../hooks/userHook';
+import { useAuthUser } from '../../hooks/userHook';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import ArticleItem from '../../components/ArticleItem';
@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
 
 const ArticlesScreen = () => {
 
-  const user = useAppAuthUser();
+  const user = useAuthUser();
 
   const { t } = useTranslation();
   

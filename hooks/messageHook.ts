@@ -42,7 +42,7 @@ type ListReturnType = [
   (index: number, id: string)=> void
 ];
 
-export const useMessageList = (messagingListId: string, userId: string): ListReturnType => {
+export const useMessageList = (userId: string, messagingListId?: string): ListReturnType => {
 
   const [list, setList] = useState<Array<Message>>([]);
 
@@ -115,13 +115,15 @@ export const useMessageList = (messagingListId: string, userId: string): ListRet
 
   useEffect(
     ()=> {
-      const unsubscribe = MessageRepository.getNew(messagingListId, (message)=> {
-        if (message.senderId !== userId) {
-          onNewMessage(message);
-        }
-      });
+      if (messagingListId !== undefined) {
+        const unsubscribe = MessageRepository.getNew(messagingListId, (message)=> {
+          if (message.senderId !== userId) {
+            onNewMessage(message);
+          }
+        });
 
-      return unsubscribe;
+        return unsubscribe;
+      }
     },
     [userId, messagingListId, onNewMessage]
   );

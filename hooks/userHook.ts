@@ -14,11 +14,6 @@ export const useAuthUser = ()=> {
   return user;
 }
 
-export const useAppAuthUser = ()=> {
-  const { user } = useAppContext();
-  return user;
-}
-
 
 type UserFetchReturnTuple = [
   ()=> void,
@@ -79,7 +74,10 @@ export const useAuthUserFetch = (): UserFetchReturnTuple => {
               setError(ERRORS.unknown);
           }
         },
-        ()=> setError(ERRORS.unknown),
+        ()=> { 
+          setLoading(false);
+          setError(ERRORS.unknown);
+        },
       );
 
       return unsubscribe;
@@ -156,7 +154,7 @@ export const useUserSignIn = (): SignInReturnTuple => {
 }
 
 
-type SignUpReturnTuple = [
+type UpdateReturnTuple = [
   (displayName: string, photoURL: string, therapist: boolean, photoBlob: Blob | null)=> Promise<void>,
   boolean,
   boolean,
@@ -164,7 +162,7 @@ type SignUpReturnTuple = [
   ()=> void
 ];
 
-export const useUserSignUp = (): SignUpReturnTuple => {
+export const useUserUpdate = (): UpdateReturnTuple => {
 
   const { user, userDispatch } = useAppContext();
 

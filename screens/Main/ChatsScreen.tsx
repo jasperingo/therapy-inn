@@ -12,7 +12,7 @@ import AuthNow from '../../components/AuthNow';
 import ChatItem from '../../components/ChatItem';
 import { useChatList, useChatReadUpdate } from '../../hooks/chatHook';
 import { useErrorMessage } from '../../hooks/errorHook';
-import { useAppAuthUser } from '../../hooks/userHook';
+import { useAuthUser } from '../../hooks/userHook';
 import { useRenderListFooter } from '../../hooks/utilHook';
 import Loading from '../../components/Loading';
 import LoadingError from '../../components/LoadingError';
@@ -30,7 +30,7 @@ const ChatsScreen = () => {
 
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Main'>>();
 
-  const user = useAppAuthUser();
+  const user = useAuthUser();
   
   const { t } = useTranslation();
   
