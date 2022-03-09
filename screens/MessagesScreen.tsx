@@ -63,7 +63,8 @@ const MessagesScreen = () => {
     loading, 
     error, 
     onNewMessage, 
-    onMessageSent
+    onMessageSent,
+    retry
   ] = useMessageList(user.id, messagingListId);
 
   useLayoutEffect(() => {
@@ -121,7 +122,7 @@ const MessagesScreen = () => {
           },
           {
             canRender: error !== null,
-            render: ()=> <LoadingError error={errorMessage(error ?? '')} onReloadPress={load} />
+            render: ()=> <LoadingError error={errorMessage(error ?? '')} onReloadPress={retry} />
           }
         ])}
         />

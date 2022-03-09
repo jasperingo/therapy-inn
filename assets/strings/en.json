@@ -12,7 +12,15 @@
 
   "Confirm": "Confirm",
 
+  "Submit": "Submit",
+
+  "Fetching_therapist": "Fetching therapist",
+
+  "Contact_therapist": "Contact therapist",
+
   "Take_survey": "Take survey",
+
+  "_incomplete_survey_error": "You have to answer all questions",
 
   "Link_to_article": "Link to article",
 
@@ -88,6 +96,21 @@
 
   "No_network_connection": "No network connection",
 
-  "_unknown_error_occured": "An unknown error occured"
+  "_unknown_error_occured": "An unknown error occured",
+
+  "__symptoms": [
+    "Do you usually have a low mood?",
+    "Have you lost interest in your regular or fun activities?",
+    "Do you have difficulty eating?",
+    "Do you feel like you are worthless?",
+    "Do you feel excessively guilty?",
+    "Do you sleep too much?",
+    "Do you sleep too little?",
+    "Do you find if difficult to concentrate?",
+    "Do you feel restless regularly?",
+    "Are you slow in performing tasks?",
+    "Do you feel tired often?",
+    "Do you have recurrent thoughts of commiting sucide?"
+  ]
 
 }

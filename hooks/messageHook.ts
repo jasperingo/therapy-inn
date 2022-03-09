@@ -39,7 +39,8 @@ type ListReturnType = [
   boolean,
   string | null, 
   (message: Message)=> void,
-  (index: number, id: string)=> void
+  (index: number, id: string)=> void,
+  ()=> void
 ];
 
 export const useMessageList = (userId: string, messagingListId?: string): ListReturnType => {
@@ -81,8 +82,8 @@ export const useMessageList = (userId: string, messagingListId?: string): ListRe
 
   const load = useCallback(
     async () => {
-      setError(null);
-      if (loading || ended) return;
+      
+      if (loading || ended || error !== null) return;
 
       try {
         const state = await NetInfo.fetch();
@@ -97,7 +98,7 @@ export const useMessageList = (userId: string, messagingListId?: string): ListRe
         setError(ERRORS.unknown);
       }
     },
-    [loading, ended, fetch]
+    [loading, ended, error, fetch]
   );
 
   const onNewMessage = useCallback(
@@ -127,6 +128,8 @@ export const useMessageList = (userId: string, messagingListId?: string): ListRe
     },
     [userId, messagingListId, onNewMessage]
   );
+
+  const retry = ()=> setError(null);
   
-  return [load, list, loading, error, onNewMessage, onMessageSent];
+  return [load, list, loading, error, onNewMessage, onMessageSent, retry];
 }

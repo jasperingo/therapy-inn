@@ -64,6 +64,31 @@ const UserRepository = {
     } else {
       throw new FirebaseError(ERRORS.userNotFound, '');
     }
+  },
+
+
+  async getTherapist(userId: string) {
+    const db = getDatabase();
+
+    const snapshots = await get(ref(db, 'users'));
+
+    const results: Array<User> = [];
+
+    snapshots.forEach((childSnapshot) => {
+      const childKey = childSnapshot.key;
+      const childData = childSnapshot.val();
+      if (childData.therapist === true && childKey !== userId) {
+        results.push({ ...childData, id: childKey });
+      }
+    });
+
+    const randomIndex = Math.floor(Math.random() * results.length);
+    
+    const user = results[randomIndex];
+
+    const chatSnapShot = await get(child(ref(db), `chats/${userId}/${user.id}`));
+
+    return [user, chatSnapShot.exists() ? chatSnapShot.val().id : undefined] as [user: User, messagingListId: string | undefined];
   }
 
 };

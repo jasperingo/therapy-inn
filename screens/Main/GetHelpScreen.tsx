@@ -8,14 +8,15 @@ import { RootStackParamList } from '../../App';
 import AppColors from '../../assets/values/colors';
 import AppDimensions from '../../assets/values/dimensions';
 import AuthNow from '../../components/AuthNow';
+import GetHelpAdvise from '../../components/GetHelpAdvise';
+import GetHelpContact from '../../components/GetHelpContact';
 import GetHelpIntro from '../../components/GetHelpIntro';
 import GetHelpSurvey from '../../components/GetHelpSurvey';
 import { useAuthUser } from '../../hooks/userHook';
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    padding: AppDimensions.medium
+    flex: 1
   },
 
   topButton: {
@@ -39,7 +40,7 @@ const GetHelpScreen = () => {
 
   const user = useAuthUser();
 
-  const [stage, setStage] = useState<0 | 1 | 2>(0);
+  const [stage, setStage] = useState<0 | 1 | 2 | 3>(0);
 
   useLayoutEffect(() => {
     if (user !== null) 
@@ -64,26 +65,30 @@ const GetHelpScreen = () => {
 
       {
         stage === 1 && 
-        <GetHelpSurvey />
+        <GetHelpSurvey onDone={(to)=> setStage(to)} />
       }
 
-      
+      {
+        stage === 2 && 
+        <GetHelpAdvise />
+      }
 
-      {/* <UIButton 
-        loading={false} 
-        text="Contact therapist" 
-        onClick={()=> {
-          navigation.navigate(
-            'Messages', 
-            { 
-              name: "Jane", 
-              phoneNumber: "+2349030572400",
-              messagingListId: undefined,
-              recipientId: 'bYnuaDQ2taahsN5xP0TIHldMCOC3'
-            }
-          );
-        }}
-        /> */}
+      {
+        stage === 3 &&
+        <GetHelpContact 
+          onContactButtonClick={(user, messagingListId)=> {
+            navigation.navigate(
+              'Messages', 
+              { 
+                recipientId: user.id,
+                name: user.displayName, 
+                phoneNumber: user.phoneNumber,
+                messagingListId: messagingListId
+              }
+            );
+          }}
+          />
+      }
     </View>
   );
 }

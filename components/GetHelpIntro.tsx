@@ -14,12 +14,17 @@ const styles = StyleSheet.create({
   },
 
   box: {
-    padding: AppDimensions.xSmall,
+    padding: AppDimensions.small,
     backgroundColor: AppColors.colorSurface
   },
 
-  text: {
+  heading: {
     fontSize: AppDimensions.large,
+    fontWeight: AppDimensions.fontBold,
+  },
+
+  text: {
+    fontSize: AppDimensions.medium,
     lineHeight: AppDimensions.xxLarge,
   }
 });
@@ -31,10 +36,10 @@ const GetHelpIntro = ({ onAccept }: { onAccept: ()=> void }) => {
   return (
     <View style={styles.container}>
       <View style={styles.box}>
+        <Text style={styles.heading}>Welcome to the Therapy inn&apos;s Get help</Text>
         <Text style={styles.text}>
-          Welcome to the Therapy inn&apos;s Get help. Here, you can get a 
-          therapist to attend to you by taking a 
-          quick survey which will help us determine the extent of your depression.
+          You have to take a quick survey which will help us determine the extent of your depression.
+          With this, we can know if you need a therapist or self-help solutions.
         </Text>
         <UIButton text={t('Take_survey')} loading={false} onClick={onAccept} />
       </View>

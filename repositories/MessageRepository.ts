@@ -1,4 +1,16 @@
-import { endBefore, get, getDatabase, limitToLast, onChildAdded, orderByChild, push, query, ref, set, startAt } from "firebase/database";
+import { 
+  endBefore, 
+  get, 
+  getDatabase, 
+  limitToLast, 
+  onChildAdded, 
+  orderByChild, 
+  push, 
+  query, 
+  ref, 
+  set, 
+  startAt 
+} from "firebase/database";
 import Chat from "../models/Chat";
 import Message from "../models/Message";
 import firebaseApp, { PAGE_LIMIT } from "./firebase.config";
