@@ -21,6 +21,7 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: AppDimensions.large,
     fontWeight: AppDimensions.fontBold,
+    marginVertical: AppDimensions.small
   },
 
   text: {
