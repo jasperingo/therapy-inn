@@ -1,61 +1,60 @@
 import { 
-  endBefore, 
-  get, 
-  getDatabase, 
-  limitToLast, 
   onChildAdded, 
   onChildChanged, 
-  orderByChild, 
-  query, 
   ref, 
-  startAt, 
-  update 
+  update ,
+  getDatabase, 
+  // endBefore, 
+  // get, 
+  // limitToLast, 
+  // orderByChild, 
+  // query, 
 } from "firebase/database";
 import Chat from "../models/Chat";
-import { PAGE_LIMIT } from "./firebase.config";
+// import { PAGE_LIMIT } from "./firebase.config";
 import UserRepository from "./UserRepository";
 
 const ChatRepository = {
 
-  async getList(id: string, page: number) {
+  // async getList(id: string, page: number) {
     
-    const db = getDatabase();
-    const chatsRef = ref(db, `chats/${id}`);
-    const orderConstraint = orderByChild('date');
-    const limitConstraint = limitToLast(PAGE_LIMIT);
-    const chatsQuery = page === 0 ?
-      query(
-        chatsRef,
-        orderConstraint,
-        limitConstraint
-      )
-      :
-      query(
-        chatsRef,
-        orderConstraint, 
-        endBefore(page),
-        limitConstraint
-      );
+  //   const db = getDatabase();
+  //   const chatsRef = ref(db, `chats/${id}`);
+  //   const orderConstraint = orderByChild('date');
+  //   const limitConstraint = limitToLast(PAGE_LIMIT);
+  //   const chatsQuery = page === 0 ?
+  //     query(
+  //       chatsRef,
+  //       orderConstraint,
+  //       limitConstraint
+  //     )
+  //     :
+  //     query(
+  //       chatsRef,
+  //       orderConstraint, 
+  //       endBefore(page),
+  //       limitConstraint
+  //     );
     
-    const snapshots = await get(chatsQuery);
+  //   const snapshots = await get(chatsQuery);
     
-    const result: Array<Chat> = [];
+  //   const result: Array<Chat> = [];
     
-    snapshots.forEach((childSnapshot) => {
-      const childKey = childSnapshot.key;
-      const childData: Chat = childSnapshot.val();
-      result.unshift({ ...childData, recipientId: childKey as string });
-    });
+  //   snapshots.forEach((childSnapshot) => {
+  //     const childKey = childSnapshot.key;
+  //     const childData: Chat = childSnapshot.val();
+  //     result.unshift({ ...childData, recipientId: childKey as string });
+  //   });
 
-    for(const item of result) {
-      const user = await UserRepository.get(item.recipientId);
-      item.recipientDisplayName = user.displayName;
-      item.recipientPhoneNumber = user.phoneNumber;
-      item.recipientPhotoURL = user.photoURL;
-    }
+  //   for(const item of result) {
+  //     const user = await UserRepository.get(item.recipientId);
+  //     item.recipientDisplayName = user.displayName;
+  //     item.recipientPhoneNumber = user.phoneNumber;
+  //     item.recipientPhotoURL = user.photoURL;
+  //   }
     
-    return result;
-  },
+  //   return result;
+  // },
 
   update(chat: Chat, userId: string) {
     const db = getDatabase();
@@ -70,11 +69,11 @@ const ChatRepository = {
     });
   },
 
-  getChanged(userId: string, onNewMessage: (chat: Chat)=> void) {
+  getUpdate(userId: string, onSuccess: (chat: Chat)=> void, onError: (error: Error) => void) {
     const db = getDatabase();
     const messageListRef = ref(db, `chats/${userId}`);
     return onChildChanged(
-      query(messageListRef), 
+      messageListRef, 
       async (data) => {
         const chat = data.val() as Chat;
         chat.recipientId = data.key as string;
@@ -82,20 +81,16 @@ const ChatRepository = {
         chat.recipientDisplayName = user.displayName;
         chat.recipientPhoneNumber = user.phoneNumber;
         chat.recipientPhotoURL = user.photoURL;
-        onNewMessage(chat);
-      }
+        onSuccess(chat);
+      },
+      onError
     );
   },
 
-  getAdded(userId: string, onNewMessage: (chat: Chat)=> void) {
+  getAll(userId: string, onSuccess: (chat: Chat)=> void, onError: (error: Error) => void) {
     const db = getDatabase();
-    const messageListRef = ref(db, `chats/${userId}`);
     return onChildAdded(
-      query(
-        messageListRef,
-        orderByChild('date'), 
-        startAt(Date.now())
-      ), 
+      ref(db, `chats/${userId}`),
       async (data) => {
         const chat = data.val() as Chat;
         chat.recipientId = data.key as string;
@@ -103,11 +98,11 @@ const ChatRepository = {
         chat.recipientDisplayName = user.displayName;
         chat.recipientPhoneNumber = user.phoneNumber;
         chat.recipientPhotoURL = user.photoURL;
-        onNewMessage(chat);
-      }
+        onSuccess(chat);
+      },
+      onError
     );
   }
-
 };
 
 export default ChatRepository;

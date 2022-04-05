@@ -1,13 +1,11 @@
 
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import NetInfo from "@react-native-community/netinfo";
 import { FlatList, StyleSheet, View } from 'react-native';
 import { RootStackParamList } from '../../App';
 import AppDimensions from '../../assets/values/dimensions';
-import ERRORS from '../../assets/values/errors';
 import AuthNow from '../../components/AuthNow';
 import ChatItem from '../../components/ChatItem';
 import { useChatList, useChatReadUpdate } from '../../hooks/chatHook';
@@ -40,68 +38,33 @@ const ChatsScreen = () => {
 
   const chatReadUpdater = useChatReadUpdate();
 
-  const [started, setStarted] = useState(false);
-
-  const [screenError, setScreenError] = useState<string | null>(null);
-
   const [
     fetch,
+    fetchUpdate,
     list, 
     loading, 
-    page,
+    loaded,
     refreshing,
     error, 
+    retryFetch,
     onRefresh
   ] = useChatList();
-
-  const getChats = useCallback(
-    async () => {
-      try {
-        const state = await NetInfo.fetch();
-
-        if (!state.isConnected) {
-          setScreenError(ERRORS.noInternetConnection);
-        } else {
-          fetch();
-          setScreenError(null);
-        }
-      } catch (error) {
-        console.log(error)
-        setScreenError(ERRORS.unknown);
-      }
-    },
-    [fetch]
-  );
   
-  const refreshChats = useCallback(
-    async () => {
-      try {
-        const state = await NetInfo.fetch();
-
-        if (!state.isConnected) {
-          alert(t('No_network_connection'));
-        } else {
-          onRefresh();
-        }
-      } catch (error) {
-        console.log(error)
-        alert(t('_unknown_error_occured'))
-      }
+  useEffect(
+    ()=> {
+      if (user !== null && !loaded)
+        return fetch(user.id);
     },
-    [onRefresh, t]
+    [user, loaded, fetch]
   );
   
   useEffect(
     ()=> {
-      if (!started) {
-        setStarted(true);
-        getChats();
-      }
+      if (user !== null && loaded)
+        return fetchUpdate(user.id);
     },
-    [started, getChats]
+    [user, loaded, fetchUpdate]
   );
-  
-  const getScreenError = ()=> error || screenError;
 
   if (user === null) {
     return <AuthNow onClick={()=> navigation.navigate('Auth', { screen: 'PhoneNumber' })} />;
@@ -114,7 +77,7 @@ const ChatsScreen = () => {
         data={list}
         style={styles.list}
         refreshing={refreshing}
-        onRefresh={refreshChats}
+        onRefresh={onRefresh}
         keyExtractor={(item)=> String(item.id)}
         renderItem={({ item })=> (
           <ChatItem 
@@ -134,18 +97,17 @@ const ChatsScreen = () => {
             }}
             />
         )}
-        onEndReached={getChats}
         ListFooterComponent={renderFooter([
           {
             canRender: loading,
             render: ()=> <Loading />
           },
           {
-            canRender: getScreenError() !== null,
-            render: ()=> <LoadingError error={errorMessage(getScreenError() ?? '')} onReloadPress={getChats} />
+            canRender: error !== null,
+            render: ()=> <LoadingError error={errorMessage(error ?? '')} onReloadPress={retryFetch} />
           },
           {
-            canRender: page > -1 && list.length === 0,
+            canRender: loaded && list.length === 0,
             render: ()=> <LoadingEmpty text={t('No_chat_found')} />
           }
         ])}
