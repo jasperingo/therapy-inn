@@ -1,7 +1,7 @@
-import { endBefore, get, getDatabase, limitToLast, orderByChild, push, query, ref, remove, set } from "firebase/database";
+import { get, getDatabase, orderByChild, push, query, ref, remove, set } from "firebase/database";
 import { getStorage, uploadBytes, ref as StorageRef } from "firebase/storage";
 import Article from "../models/Article";
-import firebaseApp, { PAGE_LIMIT } from "./firebase.config";
+import firebaseApp from "./firebase.config";
 
 const ArticleRepository = {
 
@@ -38,25 +38,12 @@ const ArticleRepository = {
     });
   },
 
-  async getList(page: number) {
+  async getList() {
     
     const db = getDatabase();
     const articlesRef = ref(db, 'articles');
     const orderConstraint = orderByChild('creatdAt');
-    const limitConstraint = limitToLast(PAGE_LIMIT);
-    const articlesQuery = page === 0 ?
-      query(
-        articlesRef,
-        orderConstraint,
-        limitConstraint
-      )
-      :
-      query(
-        articlesRef,
-        orderConstraint, 
-        endBefore(page),
-        limitConstraint
-      );
+    const articlesQuery = query(articlesRef, orderConstraint)
     
     const snapshots = await get(articlesQuery);
     

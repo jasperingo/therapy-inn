@@ -1,13 +1,13 @@
 import { FirebaseError } from "firebase/app";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import ERRORS from "../assets/values/errors";
 import { ArticleActionTypes } from "../context/AppContextType";
 import Article from "../models/Article";
 import ArticleRepository from "../repositories/ArticleRepository";
-import { PAGE_LIMIT } from "../repositories/firebase.config";
 import { useAppContext } from "./contextHook";
 import { usePhotoURLMaker } from "./photoHook";
 import { useAuthUser } from "./userHook";
+import { useNetworkDetect } from "./utilHook";
 
 type CreateReturnTuple = [
   (title: string, link: string, photoBlob: Blob)=> Promise<void>,
@@ -122,12 +122,13 @@ export const useArticleDelete = (): DeleteReturnTuple => {
 
 
 type FetchReturnType = [
-  ()=> void,
+  ()=> Promise<void>,
   Array<Article>, 
   boolean, 
-  number,
+  boolean,
   boolean,
   string | null, 
+  ()=> void,
   ()=> void
 ];
 
@@ -136,73 +137,79 @@ export const useArticleFetch = (): FetchReturnType => {
   const { 
     articles: { 
       list,
-      ended,
       loading,
       refreshing,
-      page,
+      loaded,
       error
     },
     articleDispatch
   } = useAppContext();
+
+  const connected = useNetworkDetect();
   
   const onRefresh = useCallback(
     ()=> { 
-     articleDispatch({ type: ArticleActionTypes.UNFETCHED });
+      articleDispatch({ type: ArticleActionTypes.UNFETCHED });
+    }, 
+    [articleDispatch]
+  );
+
+  const retryFetch = useCallback(
+    ()=> {
+      articleDispatch({ type: ArticleActionTypes.FETCHED, payload: { error: null } });
     }, 
     [articleDispatch]
   );
   
   const fetch = useCallback(
-    () => {
+    async ()=> {
+
+      if (!connected) {
+        articleDispatch({ 
+          type: ArticleActionTypes.FETCHED,
+          payload: { 
+            refreshing: false,
+            error: ERRORS.noInternetConnection 
+          }
+        });
+        return;
+      }
+      
       articleDispatch({
         type: ArticleActionTypes.FETCHED,
         payload: {
-          page: page === -1 ? 0 : page,
-          error: error !== null ? null : error,
-          loading: !loading && !ended ? true : loading
+          loading: true,
+          refreshing: false,
         }
       });
-    },
-    [page, error, loading, ended, articleDispatch]
-  );
-  
-  useEffect(
-    () => {
+      
+      try {
+        
+        const result = await ArticleRepository.getList();
+        
+        articleDispatch({
+          type: ArticleActionTypes.FETCHED,
+          payload: {
+            list: result,
+            loading: false,
+            loaded: true
+          }
+        });
+        
+      } catch (error) {
 
-      const fetch = async ()=> {
-        try {
-          
-          const result = await ArticleRepository.getList(page);
-          
-          articleDispatch({
-            type: ArticleActionTypes.FETCHED,
-            payload: {
-              list: result,
-              loading: false,
-              refreshing: false,
-              ended: result.length < PAGE_LIMIT,
-              page: result[result.length-1]?.creatdAt
-            }
-          });
-          
-        } catch (error) {
-
-          articleDispatch({
-            type: ArticleActionTypes.FETCHED,
-            payload: {
-              loading: false,
-              refreshing: false,
-              error: error instanceof FirebaseError ? error.code : ERRORS.unknown
-            }
-          });
-        }
+        articleDispatch({
+          type: ArticleActionTypes.FETCHED,
+          payload: {
+            loading: false,
+            error: error instanceof FirebaseError ? error.code : ERRORS.unknown
+          }
+        });
       }
-
-      if (loading && !ended) fetch();
     },
-    [loading, ended, page, articleDispatch]
+    [connected, articleDispatch]
   );
   
-  return [fetch, list, loading, page, refreshing, error, onRefresh];
+  return [fetch, list, loading, loaded, refreshing, error, onRefresh, retryFetch];
 }
 

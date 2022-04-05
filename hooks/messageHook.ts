@@ -1,9 +1,10 @@
 import { FirebaseError } from "firebase/app";
-import { useCallback, useEffect, useState } from "react";
-import NetInfo from "@react-native-community/netinfo";
+import { useCallback, useState } from "react";
 import ERRORS from "../assets/values/errors";
 import Message from "../models/Message";
 import MessageRepository from "../repositories/MessageRepository";
+import { Unsubscribe } from "firebase/auth";
+import { useNetworkDetect } from "./utilHook";
 
 
 export const useMessageCreate = (hasId: boolean) => {
@@ -34,7 +35,7 @@ export const useMessageCreate = (hasId: boolean) => {
 
 
 type ListReturnType = [
-  ()=> void,
+  (messagingListId: string)=> Unsubscribe | undefined,
   Array<Message>, 
   boolean,
   string | null, 
@@ -43,93 +44,70 @@ type ListReturnType = [
   ()=> void
 ];
 
-export const useMessageList = (userId: string, messagingListId?: string): ListReturnType => {
+export const useMessageList = (): ListReturnType => {
+
+  const connected = useNetworkDetect();
 
   const [list, setList] = useState<Array<Message>>([]);
 
-  const [ended, setEnded] = useState(false);
-
   const [loading, setLoading] = useState(false);
-
-  const [page, setPage] = useState(0);
 
   const [error, setError] = useState<string | null>(null);
   
+  const retryFetch = useCallback(()=> setError(null), []);
+
   const fetch = useCallback(
-    async ()=> {
-      try {
+    (messagingListId: string)=> {
 
-        const result = 
-          messagingListId === undefined ? 
-          [] : await MessageRepository.getList(messagingListId, page);
-        
-        setEnded(result.length === 0);
-        setPage(result[result.length-1]?.date);
-        setList((old)=> old.concat(result));
-        
-      } catch (error) {
-        console.log(error);
-        if (error instanceof FirebaseError)
-          setError(error.code);
-        else 
-          setError(ERRORS.unknown);
-      } finally {
-        setLoading(false);
+      if (!connected) {
+        setError(ERRORS.noInternetConnection);
+        return;
       }
-    },
-    [messagingListId, page]
-  );
 
-  const load = useCallback(
-    async () => {
+      setLoading(true);
+
+      setError(null);
       
-      if (loading || ended || error !== null) return;
-
-      try {
-        const state = await NetInfo.fetch();
-
-        if (!state.isConnected) {
-          setError(ERRORS.noInternetConnection);
-        } else {
-          setLoading(true);
-          fetch();
+      return MessageRepository.getAll(
+        messagingListId,
+        (message)=> {
+          setLoading(false);
+          setList((old)=> {
+            if (old.find(i=> i.id === message.id) !== undefined) {
+              return [...old];
+            } else if (old[0] === undefined || old[0].date < message.date) {
+              return [message, ...old];
+            } else {
+              return [...old, message];
+            }
+          });
+        },
+        (error) => {
+          console.log(error);
+          setLoading(false);
+          if (error instanceof FirebaseError)
+            setError(error.code);
+          else 
+            setError(ERRORS.unknown);
         }
-      } catch (error) {
-        setError(ERRORS.unknown);
-      }
+      );
     },
-    [loading, ended, error, fetch]
+    [connected]
   );
 
   const onNewMessage = useCallback(
     (message: Message) => setList((oldList)=> [message, ...oldList]), []
   );
   
-  const onMessageSent = (index: number, id: string) => {
-    setList(list.map((item, i)=> {
+  const onMessageSent = (index: number, id: string) => setList(
+    list.map((item, i)=> {
       if (i === index) {
         item.id = id;
       }
       return item;
-    }));
-  }
-
-  useEffect(
-    ()=> {
-      if (messagingListId !== undefined) {
-        const unsubscribe = MessageRepository.getNew(messagingListId, (message)=> {
-          if (message.senderId !== userId) {
-            onNewMessage(message);
-          }
-        });
-
-        return unsubscribe;
-      }
-    },
-    [userId, messagingListId, onNewMessage]
+    })
   );
-
-  const retry = ()=> setError(null);
   
-  return [load, list, loading, error, onNewMessage, onMessageSent, retry];
+  
+  return [fetch, list, loading, error, onNewMessage, onMessageSent, retryFetch];
 }

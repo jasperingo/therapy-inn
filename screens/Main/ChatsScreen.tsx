@@ -41,6 +41,7 @@ const ChatsScreen = () => {
   const [
     fetch,
     fetchUpdate,
+    checkExists,
     list, 
     loading, 
     loaded,
@@ -49,13 +50,15 @@ const ChatsScreen = () => {
     retryFetch,
     onRefresh
   ] = useChatList();
-  
+
   useEffect(
     ()=> {
-      if (user !== null && !loaded)
+      if (user !== null) {
+        checkExists(user.id);
         return fetch(user.id);
+      }
     },
-    [user, loaded, fetch]
+    [user, refreshing, error, checkExists, fetch]
   );
   
   useEffect(
@@ -85,6 +88,7 @@ const ChatsScreen = () => {
             onClick={()=> {
               if (!item.read)
                 chatReadUpdater(item, user.id);
+
               navigation.navigate(
                 'Messages', 
                 { 

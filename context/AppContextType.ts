@@ -12,6 +12,11 @@ export interface ArticleAction {
   payload?: Partial<ArticleStateType & { article: Article }>; 
 }
 
+export interface MessageAction {
+  type: 'MESSAGE_FETCHED'; 
+  payload: string; 
+}
+
 export enum UserActionTypes {
   FETCHED = 'USER_FETCHED',
   UNFETCHED = 'USER_UNFETCHED'
@@ -26,10 +31,9 @@ export enum ArticleActionTypes {
 
 export interface ArticleStateType {
   list: Array<Article>;
-  ended: boolean;
   loading: boolean;
   refreshing: boolean;
-  page: number;
+  loaded: boolean;
   error: string | null;
 }
 
@@ -38,4 +42,6 @@ export default interface AppContextType {
   userDispatch: React.Dispatch<UserAction>;
   articles: ArticleStateType;
   articleDispatch: React.Dispatch<ArticleAction>;
+  message: string;
+  messageDispatch: React.Dispatch<MessageAction>;
 }

@@ -4,10 +4,9 @@ import AppContextType, { ArticleStateType } from "./AppContextType";
 
 export const articlestate: ArticleStateType = {
   list: [],
-  ended: false,
   loading: false,
   refreshing: false,
-  page: -1,
+  loaded: false,
   error: null,
 };
 

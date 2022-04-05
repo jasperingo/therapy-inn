@@ -6,7 +6,7 @@ export const useErrorMessage = () => {
   const { t } = useTranslation();
 
   return (errorCode: string)=> {
-    console.log(errorCode)
+    
     switch(errorCode) {
       case 'auth/invalid-phone-number':
         return t('_phone_number_invalid');

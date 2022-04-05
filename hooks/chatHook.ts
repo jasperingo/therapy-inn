@@ -1,16 +1,18 @@
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState } from "react";
 import { FirebaseError } from "firebase/app";
 import { Unsubscribe } from "firebase/auth";
-import NetInfo from "@react-native-community/netinfo";
 import ERRORS from "../assets/values/errors";
 import Chat from "../models/Chat";
 import ChatRepository from "../repositories/ChatRepository";
 import { useNotification } from "./notificationHook";
+import { useAppContext } from "./contextHook";
+import { useNetworkDetect } from "./utilHook";
 
 
 type ListReturnType = [
   (userId: string)=> Unsubscribe | undefined,
   (userId: string)=> Unsubscribe | undefined,
+  (userId: string) => Promise<void>,
   Array<Chat>, 
   boolean,
   boolean,
@@ -21,12 +23,16 @@ type ListReturnType = [
 ];
 
 export const useChatList = (): ListReturnType => {
+
+  const { message } = useAppContext();
   
+  const chatReadUpdater = useChatReadUpdate();
+
   const sendNotification = useNotification();
 
-  const [list, setList] = useState<Array<Chat>>([]);
+  const connected = useNetworkDetect();
 
-  const [connected, setConnected] = useState(false);
+  const [list, setList] = useState<Array<Chat>>([]);
 
   const [loaded, setLoaded] = useState(false);
 
@@ -45,22 +51,39 @@ export const useChatList = (): ListReturnType => {
     []
   );
   
-  const retryFetch = useCallback(
-    ()=> { 
-      setError(null);
-      setLoaded(false);
-    }, 
-    []
-  );
+  const retryFetch = useCallback(()=> setError(null), []);
 
-  const fetch = useCallback(
-    (userId) => {
+  const checkExists = useCallback(
+    async (userId: string)=> {
 
       if (!connected) {
         setError(ERRORS.noInternetConnection);
         return;
       }
 
+      try {
+        if (!await ChatRepository.exists(userId)) {
+          setLoaded(true);
+          setLoading(false);
+        }
+      } catch(error) {
+        console.log(error);
+        setError(ERRORS.unknown);
+      }
+    },
+    [connected]
+  );
+
+  const fetch = useCallback(
+    (userId: string) => {
+
+      setRefreshing(false);
+
+      if (!connected) {
+        setError(ERRORS.noInternetConnection);
+        return;
+      }
+      
       setError(null);
       
       setLoading(true);
@@ -69,16 +92,17 @@ export const useChatList = (): ListReturnType => {
         userId,
         (chat) => {
           setLoading(false);
-          setRefreshing(false);
           setLoaded(true);
           setList((old)=> { 
             
-            if (!chat.read) sendNotification(chat);
+            if (!chat.read && message !== chat.id) sendNotification(chat);
+
+            const filteredList = old.filter(i=> i.id !== chat.id);
 
             if (old[0] === undefined || old[0].date < chat.date) {
-              return [chat, ...old];
+              return [chat, ...filteredList];
             } else {
-              return [...old, chat];
+              return [...filteredList, chat];
             }
           });
         },
@@ -86,7 +110,6 @@ export const useChatList = (): ListReturnType => {
           console.log(error);
 
           setLoading(false);
-          setRefreshing(false);
           if (error instanceof FirebaseError)
             setError(error.code);
           else 
@@ -95,28 +118,18 @@ export const useChatList = (): ListReturnType => {
       );
 
     },
-    [connected, sendNotification]
-  );
-
-  useEffect(
-    ()=> {
-      return NetInfo.addEventListener((state)=> {
-        setConnected(state.isConnected ?? false);
-      });
-    },
-    []
+    [message, connected, sendNotification]
   );
 
   const fetchUpdate = useCallback(
     (userId)=> {
 
-      if (!connected) return;
-
       return ChatRepository.getUpdate(
         userId, 
         (chat)=> setList(oldList => {
 
-          if (!chat.read) sendNotification(chat);
+          if (!chat.read && message !== chat.id) sendNotification(chat);
+          else if (message === chat.id) chatReadUpdater(chat, userId);
 
           const oldChat = oldList.find(i=> i.id === chat.id);
 
@@ -128,10 +141,10 @@ export const useChatList = (): ListReturnType => {
         (error)=> console.log(error)
       );
     },
-    [connected, sendNotification]
+    [message, sendNotification, chatReadUpdater]
   );
 
-  return [fetch, fetchUpdate, list, loading, loaded, refreshing, error, retryFetch, onRefresh];
+  return [fetch, fetchUpdate, checkExists, list, loading, loaded, refreshing, error, retryFetch, onRefresh];
 }
 
 export const useChatReadUpdate = () => {
@@ -149,4 +162,3 @@ export const useChatReadUpdate = () => {
     }
   }
 }
-

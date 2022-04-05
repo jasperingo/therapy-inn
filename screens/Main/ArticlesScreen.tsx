@@ -1,8 +1,7 @@
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import NetInfo from "@react-native-community/netinfo";
 import { FloatingAction } from "react-native-floating-action";
 import AppDimensions from '../../assets/values/dimensions';
 import AppColors from '../../assets/values/colors';
@@ -17,7 +16,6 @@ import Loading from '../../components/Loading';
 import LoadingError from '../../components/LoadingError';
 import LoadingEmpty from '../../components/LoadingEmpty';
 import { useErrorMessage } from '../../hooks/errorHook';
-import ERRORS from '../../assets/values/errors';
 import { RootStackParamList } from '../../App';
 
 
@@ -45,66 +43,23 @@ const ArticlesScreen = () => {
 
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Main'>>();
 
-  const [started, setStarted] = useState(false);
-
-  const [screenError, setScreenError] = useState<string | null>(null);
-
   const [
     fetch,
     list, 
     loading, 
-    page,
+    loaded,
     refreshing,
     error, 
-    onRefresh
+    onRefresh,
+    retryFetch
   ] = useArticleFetch();
-
-  const getArticles = useCallback(
-    async () => {
-      try {
-        const state = await NetInfo.fetch();
-
-        if (!state.isConnected) {
-          setScreenError(ERRORS.noInternetConnection);
-        } else {
-          fetch();
-          setScreenError(null);
-        }
-      } catch {
-        setScreenError(ERRORS.unknown);
-      }
-    },
-    [fetch]
-  );
-  
-  const refreshArticles = useCallback(
-    async () => {
-      try {
-        const state = await NetInfo.fetch();
-
-        if (!state.isConnected) {
-          alert(t('No_network_connection'));
-        } else {
-          onRefresh();
-        }
-      } catch {
-        alert(t('_unknown_error_occured'))
-      }
-    },
-    [onRefresh, t]
-  );
   
   useEffect(
     ()=> {
-      if (!started) {
-        setStarted(true);
-        getArticles();
-      }
+      if (!loaded) fetch();
     },
-    [started, getArticles]
+    [loaded, fetch]
   );
-  
-  const getScreenError = ()=> error || screenError;
   
   return (
     <View style={styles.container}>
@@ -113,23 +68,22 @@ const ArticlesScreen = () => {
         data={list}
         style={styles.list}
         refreshing={refreshing}
-        onRefresh={refreshArticles}
+        onRefresh={onRefresh}
         renderItem={({ item })=> (
           <ArticleItem article={item} />
         )}
         keyExtractor={(item)=> String(item.id)}
-        onEndReached={getArticles}
         ListFooterComponent={renderFooter([
           {
             canRender: loading,
             render: ()=> <Loading />
           },
           {
-            canRender: getScreenError() !== null,
-            render: ()=> <LoadingError error={errorMessage(getScreenError() ?? '')} onReloadPress={getArticles} />
+            canRender: error !== null,
+            render: ()=> <LoadingError error={errorMessage(error ?? '')} onReloadPress={retryFetch} />
           },
           {
-            canRender: page > -1 && list.length === 0,
+            canRender: loaded && list.length === 0,
             render: ()=> <LoadingEmpty text={t('No_article_found')} />
           }
         ])}

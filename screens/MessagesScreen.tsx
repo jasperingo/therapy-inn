@@ -18,6 +18,7 @@ import { useErrorMessage } from '../hooks/errorHook';
 import LoadingError from '../components/LoadingError';
 import { useMessageList } from '../hooks/messageHook';
 import User from '../models/User';
+import { useAppContext } from '../hooks/contextHook';
 
 const styles = StyleSheet.create({
   container: {
@@ -40,6 +41,8 @@ const CallButton = ({ phoneNumber }: { phoneNumber: string }) => {
 
 const MessagesScreen = () => {
 
+  const { messageDispatch } = useAppContext();
+
   const { 
     params: { 
       name, 
@@ -58,25 +61,41 @@ const MessagesScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Messages'>>();
 
   const [
-    load, 
+    fetch, 
     list, 
     loading, 
     error, 
     onNewMessage, 
     onMessageSent,
-    retry
-  ] = useMessageList(user.id, messagingListId);
+    retryFetch
+  ] = useMessageList();
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerTitle: ()=> <ChatHeader fullName={name} phoneNumber={phoneNumber} />,
-      headerRight: () => (
-        <CallButton phoneNumber={phoneNumber} />
-      ),
-    });
-  }, [name, phoneNumber, navigation]);
+  useLayoutEffect(
+    () => {
+      navigation.setOptions({
+        headerTitle: ()=> <ChatHeader fullName={name} phoneNumber={phoneNumber} />,
+        headerRight: () => (
+          <CallButton phoneNumber={phoneNumber} />
+        ),
+      });
+    }, 
+    [name, phoneNumber, navigation]
+  );
 
-  useEffect(()=> load(), [load]);
+  useEffect(
+    ()=> {
+      if (messagingListId) {
+        messageDispatch({ type: 'MESSAGE_FETCHED', payload: messagingListId });
+        const unsubscribe = fetch(messagingListId);
+
+        return ()=> {
+          if (unsubscribe) unsubscribe();
+          messageDispatch({ type: 'MESSAGE_FETCHED', payload: '' });
+        }
+      }
+    }, 
+    [messagingListId, fetch, messageDispatch]
+  );
 
   const sendMessage = (content: string) => {
     
@@ -105,7 +124,6 @@ const MessagesScreen = () => {
         style={styles.list}
         keyExtractor={(item)=> `message-${item.id}-${item.date}`}
         inverted={true}
-        onEndReached={load}
         renderItem={({ item, index })=> (
           <MessageItem 
             index={index}
@@ -122,7 +140,7 @@ const MessagesScreen = () => {
           },
           {
             canRender: error !== null,
-            render: ()=> <LoadingError error={errorMessage(error ?? '')} onReloadPress={retry} />
+            render: ()=> <LoadingError error={errorMessage(error ?? '')} onReloadPress={retryFetch} />
           }
         ])}
         />

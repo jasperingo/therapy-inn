@@ -15,6 +15,7 @@ import SplashScreen from './screens/SplashScreen';
 import MessagesScreen from './screens/MessagesScreen';
 import ArticleCreateScreen from './screens/ArticleCreateScreen';
 import AppDimensions from './assets/values/dimensions';
+import MessageReducer from './context/MessageReducer';
 
 LogBox.ignoreLogs(['Setting a timer for a long period of time'])
 
@@ -50,12 +51,16 @@ const App = ()=> {
 
   const [articles, articleDispatch] = useReducer(ArticleReducer, articlestate);
 
+  const [message, messageDispatch] = useReducer(MessageReducer, '');
+
   return (
     <AppContext.Provider value={{
       user,
       userDispatch,
       articles, 
-      articleDispatch
+      articleDispatch,
+      message, 
+      messageDispatch
     }}
     >
       <SafeAreaProvider>

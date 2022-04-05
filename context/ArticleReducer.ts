@@ -7,20 +7,19 @@ const ArticleReducer = (state: ArticleStateType, { type, payload }: ArticleActio
   switch(type) {
 
     case ArticleActionTypes.UNFETCHED:
-      return { ...articlestate, loading: true, page: 0 };
+      return { ...articlestate, refreshing: true };
 
     case ArticleActionTypes.FETCHED:
-      if (payload !== undefined && 'loading' in payload) {
+      if (payload !== undefined) {
         
         const list = payload.list !== undefined ? payload.list : [];
 
         return {
           list: [... state.list, ...list],
-          ended: payload.ended ?? state.ended,
-          error: payload.error ?? state.error,
           loading: payload.loading ?? state.loading,
-          page: payload.page ?? state.page,
-          refreshing: payload.refreshing ?? state.refreshing
+          loaded: payload.loaded ?? state.loaded,
+          refreshing: payload.refreshing ?? state.refreshing,
+          error: payload.error !== undefined ? payload.error : state.error,
         };
 
       } else {
@@ -28,10 +27,9 @@ const ArticleReducer = (state: ArticleStateType, { type, payload }: ArticleActio
       }
     
     case ArticleActionTypes.CREATED:
-      if (payload !== undefined && payload.article !== undefined && state.page > -1) {
+      if (payload !== undefined && payload.article !== undefined) {
         return {
           ...state,
-          page: state.page > 0 ? state.page : payload.article.creatdAt,
           list: [payload.article, ...state.list]
         };
       } else {

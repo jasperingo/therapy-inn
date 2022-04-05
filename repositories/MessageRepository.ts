@@ -1,19 +1,13 @@
-import { 
-  endBefore, 
-  get, 
+import {
   getDatabase, 
-  limitToLast, 
   onChildAdded, 
-  orderByChild, 
   push, 
-  query, 
   ref, 
   set, 
-  startAt 
 } from "firebase/database";
 import Chat from "../models/Chat";
 import Message from "../models/Message";
-import firebaseApp, { PAGE_LIMIT } from "./firebase.config";
+import firebaseApp from "./firebase.config";
 
 const MessageRepository = {
 
@@ -46,55 +40,50 @@ const MessageRepository = {
     return [newMessageRef.key as string, newMessagesRef.key as string] as [messageId: string, messagingListId: string];
   },
 
-  async getList(messageingListId: string, page: number) {
-    const db = getDatabase();
-    const messagesRef = ref(db, `messages/${messageingListId}`);
-    const orderConstraint = orderByChild('date');
-    const limitConstraint = limitToLast(PAGE_LIMIT);
-    const messagesQuery = page === 0 ?
-      query(
-        messagesRef,
-        orderConstraint,
-        limitConstraint
-      )
-      :
-      query(
-        messagesRef,
-        orderConstraint, 
-        endBefore(page),
-        limitConstraint
-      );
+  // async getList(messageingListId: string, page: number) {
+  //   const db = getDatabase();
+  //   const messagesRef = ref(db, `messages/${messageingListId}`);
+  //   const orderConstraint = orderByChild('date');
+  //   const limitConstraint = limitToLast(PAGE_LIMIT);
+  //   const messagesQuery = page === 0 ?
+  //     query(
+  //       messagesRef,
+  //       orderConstraint,
+  //       limitConstraint
+  //     )
+  //     :
+  //     query(
+  //       messagesRef,
+  //       orderConstraint, 
+  //       endBefore(page),
+  //       limitConstraint
+  //     );
     
-    const snapshots = await get(messagesQuery);
+  //   const snapshots = await get(messagesQuery);
     
-    const result: Array<Message> = [];
+  //   const result: Array<Message> = [];
 
-    snapshots.forEach((childSnapshot) => {
-      const childKey = childSnapshot.key;
-      const childData: Message = childSnapshot.val();
-      result.unshift({ ...childData, id: childKey as string });
-    });
+  //   snapshots.forEach((childSnapshot) => {
+  //     const childKey = childSnapshot.key;
+  //     const childData: Message = childSnapshot.val();
+  //     result.unshift({ ...childData, id: childKey as string });
+  //   });
     
-    return result;
-  },
+  //   return result;
+  // },
 
-  getNew(messageingListId: string, onNewMessage: (message: Message)=> void) {
+  getAll(messageingListId: string, onNewMessage: (message: Message)=> void, onError: (error: Error) => void) {
     const db = getDatabase();
-    const messageListRef = ref(db, `messages/${messageingListId}`);
     return onChildAdded(
-      query(
-        messageListRef, 
-        orderByChild('date'), 
-        startAt(Date.now())
-      ), 
+      ref(db, `messages/${messageingListId}`), 
       (data) => {
         const message = data.val() as Message;
         message.id = data.key as string;
         onNewMessage(message);
-      }
+      },
+      onError
     );
-  }
-
+  },
 };
 
 export default MessageRepository;
