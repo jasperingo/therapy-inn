@@ -4,8 +4,7 @@
     "slug": "therapy-inn",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    
+    "icon": "./assets/app-icon.png",
     "updates": {
       "fallbackToCacheTimeout": 0
     },
@@ -17,9 +16,10 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/app-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "com.jasperiq.therapyinn"
     },
     "web": {
       "favicon": "./assets/favicon.png"
