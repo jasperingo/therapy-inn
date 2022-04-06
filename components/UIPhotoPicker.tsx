@@ -89,7 +89,7 @@ const UIPhotoPicker = ({ photo, error, loading, defaultPhoto, imageStyle = style
   const getDefaultPhoto = () => {
     switch(defaultPhoto) {
       case PhotoDefaultTypes.ARTICLE:
-        return require('../assets/photos/depressed-article.jpg');
+        return require('../assets/photos/article.png');
       default:
         return require('../assets/photos/user.png');
     }
