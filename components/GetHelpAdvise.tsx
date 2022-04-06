@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { FlatList, StyleSheet, Text } from 'react-native';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
 import AppColors from '../assets/values/colors';
 import AppDimensions from '../assets/values/dimensions';
 
@@ -29,9 +29,15 @@ const styles = StyleSheet.create({
   },
 
   item: {
+    flexDirection: 'row',
     padding: AppDimensions.xSmall,
     marginBottom: AppDimensions.small,
     backgroundColor: AppColors.colorSurface
+  },
+
+  itemNumber: {
+    marginRight: AppDimensions.xSmall,
+    fontWeight: AppDimensions.fontBold
   }
 });
 
@@ -42,7 +48,10 @@ const GetHelpAdvise = () => {
       style={styles.container}
       keyExtractor={(item)=> item}
       renderItem={({ item, index }) => (
-        <Text style={styles.item}>{ (index+1) }. { item }</Text>
+        <View style={styles.item}>
+          <Text style={styles.itemNumber}>{ (index+1) }.</Text>
+          <Text>{ item }</Text>
+        </View>
       )}
       ListHeaderComponent={(
         <Text style={styles.heading}>
