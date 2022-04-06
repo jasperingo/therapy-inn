@@ -19,6 +19,8 @@ import LoadingError from '../components/LoadingError';
 import { useMessageList } from '../hooks/messageHook';
 import User from '../models/User';
 import { useAppContext } from '../hooks/contextHook';
+import ERRORS from '../assets/values/errors';
+import { useNetInfo } from '@react-native-community/netinfo';
 
 const styles = StyleSheet.create({
   container: {
@@ -58,12 +60,17 @@ const MessagesScreen = () => {
 
   const renderFooter = useRenderListFooter();
 
+  const network = useNetInfo();
+
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Messages'>>();
 
   const [
-    fetch, 
+    fetchMessages, 
+    fetchNewMessages,
+    setError,
     list, 
     loading, 
+    loaded,
     error, 
     onNewMessage, 
     onMessageSent,
@@ -86,15 +93,27 @@ const MessagesScreen = () => {
     ()=> {
       if (messagingListId) {
         messageDispatch({ type: 'MESSAGE_FETCHED', payload: messagingListId });
-        const unsubscribe = fetch(messagingListId);
+      }
+      
+      if (messagingListId && !network.isConnected && !loaded && error === null)
+        setError(ERRORS.noInternetConnection);
+      else if (messagingListId && network.isConnected && !loaded && !loading) 
+        fetchMessages(messagingListId);
 
-        return ()=> {
-          if (unsubscribe) unsubscribe();
-          messageDispatch({ type: 'MESSAGE_FETCHED', payload: '' });
-        }
+      return ()=> {
+        messageDispatch({ type: 'MESSAGE_FETCHED', payload: '' });
       }
     }, 
-    [messagingListId, fetch, messageDispatch]
+    [messagingListId, network.isConnected, loaded, loading, error, fetchMessages, messageDispatch, setError]
+  );
+
+  useEffect(
+    ()=> {
+      if (user === null || !messagingListId || !loaded) return;
+
+      return fetchNewMessages(messagingListId, user.id);
+    },
+    [messagingListId, loaded, user, fetchNewMessages]
   );
 
   const sendMessage = (content: string) => {

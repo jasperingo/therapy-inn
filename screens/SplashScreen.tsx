@@ -1,10 +1,11 @@
 
-import * as NetInfo from '@react-native-community/netinfo';
+import React, { useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useEffect, useState } from 'react';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
+import { useNetInfo } from '@react-native-community/netinfo';
 import { RootStackParamList } from '../App';
 import AppColors from '../assets/values/colors';
 import AppDimensions from '../assets/values/dimensions';
@@ -23,10 +24,19 @@ const styles = StyleSheet.create({
     backgroundColor: AppColors.colorPrimary,
   },
 
+  nameIconContainer: {
+    alignItems: 'center'
+  },
+
   appName: {
     fontSize: 40,
     color: AppColors.colorOnPrimary,
-    fontWeight: AppDimensions.fontBold
+    fontFamily: 'SecularOne-Regular'
+  },
+
+  appIcon: {
+    fontSize: 80,
+    color: AppColors.colorOnPrimary
   },
 
   success: {
@@ -42,34 +52,22 @@ const SplashScreen = () => {
 
   const errorMessage = useErrorMessage();
 
-  const [retry, setRetry] = useState(0);
-
-  const [screenError, setScreenError] = useState<string | null>(null);
+  const network = useNetInfo();
 
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Splash'>>();
 
-  const [fetch, loading, success, error] = useAuthUserFetch();
-
+  const [fetchUser, setError, loading, success, error, retryFetch] = useAuthUserFetch();
 
   useEffect(
     () => {
-      (async ()=> {
-        try {
+      if (success) return;
 
-          const state = await NetInfo.fetch();
-
-          if (!state.isConnected) {
-            setScreenError(ERRORS.noInternetConnection);
-          } else {
-            fetch();
-            setScreenError(null);
-          }
-        } catch {
-          setScreenError(ERRORS.unknown);
-        }
-      })();
+      if (!network.isConnected && error === null)
+        setError(ERRORS.noInternetConnection);
+      else if (network.isConnected && !loading)
+        fetchUser();
     }, 
-    [retry, fetch]
+    [success, loading, error, network.isConnected, fetchUser, setError]
   );
 
   useEffect(
@@ -79,19 +77,20 @@ const SplashScreen = () => {
     },
     [success, navigation]
   );
-  
-  const getError = ()=> error || screenError;
 
   return (
     <View style={styles.container}>
-      <Text style={styles.appName}>{ t('App_name') }</Text>
+      <View style={styles.nameIconContainer}>
+        <Ionicons name="medkit-outline" style={styles.appIcon} />
+        <Text style={styles.appName}>{ t('App_name') }</Text>
+      </View>
       {
         loading &&
         <Loading color={AppColors.colorOnPrimary} />
       }
       {
-        getError() !== null &&
-        <LoadingError error={errorMessage(getError() ?? '')} onReloadPress={()=> setRetry(retry+1)} />
+        error !== null &&
+        <LoadingError error={errorMessage(error ?? '')} onReloadPress={retryFetch} />
       }
       {
         success && 

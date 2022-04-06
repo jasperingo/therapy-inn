@@ -1,7 +1,7 @@
 
 import { FirebaseError } from 'firebase/app';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { useCallback, useEffect, useState } from 'react';
+import { getAuth, onAuthStateChanged, Unsubscribe } from 'firebase/auth';
+import { useCallback, useState } from 'react';
 import NetInfo from '@react-native-community/netinfo';
 import ERRORS from '../assets/values/errors';
 import AppContextType, { UserActionTypes } from '../context/AppContextType';
@@ -17,15 +17,17 @@ export const useAuthUser = ()=> {
 
 
 type UserFetchReturnTuple = [
-  ()=> void,
+  ()=> Unsubscribe,
+  (error: string) => void,
   boolean, 
   boolean, 
-  string | null
+  string | null,
+  () => void
 ];
 
 export const useAuthUserFetch = (): UserFetchReturnTuple => {
 
-  const { userDispatch, user } = useAppContext();
+  const { userDispatch } = useAppContext();
 
   const [loading, setLoading] = useState(false);
 
@@ -33,29 +35,26 @@ export const useAuthUserFetch = (): UserFetchReturnTuple => {
 
   const [error, setError] = useState<string | null>(null);
 
-  const fetch = useCallback(
-    ()=> {
+  const retryFetch = ()=> setError(null);
+
+  const setPageError = (error: string)=> {
+    setError(error);
+    setLoading(false);
+  }
+
+  const fetchUser = useCallback(
+    () => {
+
       setError(null);
-      setSuccess(false);
-      setLoading((old)=> old === false ? true : false);
-    },
-    []
-  );
+      setLoading(true);
 
-  useEffect(
-     () => {
-
-      if (!loading) return;
-
-      const auth = getAuth(firebaseApp);
-
-      const unsubscribe = onAuthStateChanged(
-        auth, 
+      return onAuthStateChanged(
+        getAuth(firebaseApp), 
         async (authUser)=> {
 
-          if (authUser === null || user !== null) {
-            setLoading(false);
+          if (authUser === null) {
             setSuccess(true);
+            setLoading(false);
             return;
           }
 
@@ -65,15 +64,12 @@ export const useAuthUserFetch = (): UserFetchReturnTuple => {
               payload: dbUser,
               type: UserActionTypes.FETCHED
             });
-            setLoading(false);
             setSuccess(true);
+            setLoading(false);
           } catch (error) {
             console.error(error);
             setLoading(false);
-            if (error instanceof FirebaseError)
-              setError(error.code);
-            else 
-              setError(ERRORS.unknown);
+            setError((error instanceof FirebaseError) ? error.code : ERRORS.unknown);
           }
         },
         ()=> { 
@@ -81,13 +77,11 @@ export const useAuthUserFetch = (): UserFetchReturnTuple => {
           setError(ERRORS.unknown);
         },
       );
-
-      return unsubscribe;
     },
-    [loading, user, userDispatch]
+    [userDispatch]
   );
   
-  return [fetch, loading, success, error]
+  return [fetchUser, setPageError, loading, success, error, retryFetch]
 }
 
 

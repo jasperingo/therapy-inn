@@ -7,7 +7,6 @@ import ArticleRepository from "../repositories/ArticleRepository";
 import { useAppContext } from "./contextHook";
 import { usePhotoURLMaker } from "./photoHook";
 import { useAuthUser } from "./userHook";
-import { useNetworkDetect } from "./utilHook";
 
 type CreateReturnTuple = [
   (title: string, link: string, photoBlob: Blob)=> Promise<void>,
@@ -123,6 +122,7 @@ export const useArticleDelete = (): DeleteReturnTuple => {
 
 type FetchReturnType = [
   ()=> Promise<void>,
+  (error: string) => void,
   Array<Article>, 
   boolean, 
   boolean,
@@ -144,40 +144,32 @@ export const useArticleFetch = (): FetchReturnType => {
     },
     articleDispatch
   } = useAppContext();
-
-  const connected = useNetworkDetect();
   
   const onRefresh = useCallback(
-    ()=> { 
-      articleDispatch({ type: ArticleActionTypes.UNFETCHED });
-    }, 
+    ()=> articleDispatch({ type: ArticleActionTypes.UNFETCHED }), 
     [articleDispatch]
   );
 
   const retryFetch = useCallback(
-    ()=> {
-      articleDispatch({ type: ArticleActionTypes.FETCHED, payload: { error: null } });
-    }, 
+    ()=> articleDispatch({ type: ArticleActionTypes.FETCHED, payload: { error: null } }), 
+    [articleDispatch]
+  );
+
+  const setError = useCallback(
+    (error: string)=> articleDispatch({ 
+      type: ArticleActionTypes.FETCHED, 
+      payload: { error, loading: false, refreshing: false, } 
+    }), 
     [articleDispatch]
   );
   
   const fetch = useCallback(
     async ()=> {
-
-      if (!connected) {
-        articleDispatch({ 
-          type: ArticleActionTypes.FETCHED,
-          payload: { 
-            refreshing: false,
-            error: ERRORS.noInternetConnection 
-          }
-        });
-        return;
-      }
       
       articleDispatch({
         type: ArticleActionTypes.FETCHED,
         payload: {
+          error: null,
           loading: true,
           refreshing: false,
         }
@@ -197,19 +189,12 @@ export const useArticleFetch = (): FetchReturnType => {
         });
         
       } catch (error) {
-
-        articleDispatch({
-          type: ArticleActionTypes.FETCHED,
-          payload: {
-            loading: false,
-            error: error instanceof FirebaseError ? error.code : ERRORS.unknown
-          }
-        });
+        setError(error instanceof FirebaseError ? error.code : ERRORS.unknown);
       }
     },
-    [connected, articleDispatch]
+    [setError, articleDispatch]
   );
   
-  return [fetch, list, loading, loaded, refreshing, error, onRefresh, retryFetch];
+  return [fetch, setError, list, loading, loaded, refreshing, error, onRefresh, retryFetch];
 }
 

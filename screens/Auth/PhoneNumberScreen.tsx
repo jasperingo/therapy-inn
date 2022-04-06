@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
 import { ApplicationVerifier, getAuth, PhoneAuthProvider } from "firebase/auth";
-import NetInfo from '@react-native-community/netinfo';
+import { useNetInfo } from '@react-native-community/netinfo';
 import validator from 'validator';
 import AppDimensions from '../../assets/values/dimensions';
 import UIButton from '../../components/UIButton';
@@ -30,6 +30,8 @@ const PhoneNumberScreen = () => {
   const { t } = useTranslation();
 
   const errorMessage = useErrorMessage();
+
+  const network = useNetInfo();
 
   const navigation = useNavigation<NativeStackNavigationProp<AuthTabParamList>>();
 
@@ -72,14 +74,14 @@ const PhoneNumberScreen = () => {
       setPhoneNumberError(t('_phone_number_invalid'));
     } else {
       setPhoneNumberError('');
-      NetInfo.fetch().then(state => {
-        if (!state.isConnected) {
-          alert(t('No_network_connection'));
-        } else {
-          setLoading(true);
-          sendPhoneNumberVerification();
-        }
-      });
+
+      if (!network.isConnected) {
+        alert(t('No_network_connection'));
+        return;
+      }
+
+      setLoading(true);
+      sendPhoneNumberVerification();
     }
   }
 

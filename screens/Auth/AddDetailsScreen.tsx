@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import validator from 'validator';
-import NetInfo from '@react-native-community/netinfo';
+import { useNetInfo } from '@react-native-community/netinfo';
 import AppDimensions from '../../assets/values/dimensions';
 import UIButton from '../../components/UIButton';
 import UITextInput from '../../components/UITextInput';
@@ -33,6 +33,8 @@ const AddDetailsScreen = () => {
   const photoURIToBlob = usePhotoURIToBlob();
 
   const photoURLMaker = usePhotoURLMaker('users');
+
+  const network = useNetInfo();
 
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Auth'>>();
 
@@ -83,15 +85,14 @@ const AddDetailsScreen = () => {
       setPhotoError('');
     }
 
-    if (!error) {
-      NetInfo.fetch().then(state => {
-        if (!state.isConnected) {
-          alert(t('No_network_connection'));
-        } else {
-          onSubmit(fullName, photo, therapist, photoBlob);
-        }
-      });
+    if (error) return;
+
+    if (!network.isConnected) {
+      alert(t('No_network_connection'));
+      return;
     }
+
+    onSubmit(fullName, photo, therapist, photoBlob);
   }
 
   const onPickPhoto = async (result: string) => {

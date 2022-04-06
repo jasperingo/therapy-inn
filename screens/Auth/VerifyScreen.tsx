@@ -12,6 +12,7 @@ import { AuthTabParamList } from './AuthScreens';
 import { useErrorMessage } from '../../hooks/errorHook';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useUserSignIn } from '../../hooks/userHook';
+import { useNetInfo } from '@react-native-community/netinfo';
 
 const styles = StyleSheet.create({
   container: {
@@ -35,6 +36,8 @@ const VerifyScreen = () => {
   const { t } = useTranslation();
 
   const errorMessage = useErrorMessage();
+
+  const network = useNetInfo();
 
   const navigation = useNavigation<NativeStackNavigationProp<AuthTabParamList>>();
 
@@ -75,10 +78,16 @@ const VerifyScreen = () => {
       setCodeError(t('_verification_code_invalid'));
     } else {
       setCodeError('');
+
+      if (!network.isConnected) {
+        alert(t('No_network_connection'));
+        return;
+      }
+
       onSubmit(id, code, phoneNumber);
     }
   }
-
+  
   return (
     <View style={styles.container}>
 

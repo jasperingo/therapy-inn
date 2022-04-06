@@ -17,6 +17,8 @@ import LoadingError from '../../components/LoadingError';
 import LoadingEmpty from '../../components/LoadingEmpty';
 import { useErrorMessage } from '../../hooks/errorHook';
 import { RootStackParamList } from '../../App';
+import ERRORS from '../../assets/values/errors';
+import { useNetInfo } from '@react-native-community/netinfo';
 
 
 const styles = StyleSheet.create({
@@ -41,10 +43,13 @@ const ArticlesScreen = () => {
 
   const renderFooter = useRenderListFooter();
 
+  const network = useNetInfo();
+
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Main'>>();
 
   const [
-    fetch,
+    fetchArticles,
+    setError,
     list, 
     loading, 
     loaded,
@@ -56,9 +61,12 @@ const ArticlesScreen = () => {
   
   useEffect(
     ()=> {
-      if (!loaded) fetch();
+      if (!network.isConnected && !loaded && error === null)
+        setError(ERRORS.noInternetConnection);
+      else if (network.isConnected && !loaded && !loading) 
+        fetchArticles();
     },
-    [loaded, fetch]
+    [loaded, network.isConnected, error, loading, fetchArticles, setError]
   );
   
   return (

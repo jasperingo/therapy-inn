@@ -1,9 +1,12 @@
 import {
+  get,
   getDatabase, 
   onChildAdded, 
+  orderByChild, 
   push, 
+  query, 
   ref, 
-  set, 
+  set
 } from "firebase/database";
 import Chat from "../models/Chat";
 import Message from "../models/Message";
@@ -40,39 +43,26 @@ const MessageRepository = {
     return [newMessageRef.key as string, newMessagesRef.key as string] as [messageId: string, messagingListId: string];
   },
 
-  // async getList(messageingListId: string, page: number) {
-  //   const db = getDatabase();
-  //   const messagesRef = ref(db, `messages/${messageingListId}`);
-  //   const orderConstraint = orderByChild('date');
-  //   const limitConstraint = limitToLast(PAGE_LIMIT);
-  //   const messagesQuery = page === 0 ?
-  //     query(
-  //       messagesRef,
-  //       orderConstraint,
-  //       limitConstraint
-  //     )
-  //     :
-  //     query(
-  //       messagesRef,
-  //       orderConstraint, 
-  //       endBefore(page),
-  //       limitConstraint
-  //     );
+  async getList(messageingListId: string) {
+    const db = getDatabase();
+    const messagesRef = ref(db, `messages/${messageingListId}`);
+    const orderConstraint = orderByChild('date');
+    const messagesQuery = query(messagesRef, orderConstraint);
     
-  //   const snapshots = await get(messagesQuery);
+    const snapshots = await get(messagesQuery);
     
-  //   const result: Array<Message> = [];
+    const result: Array<Message> = [];
 
-  //   snapshots.forEach((childSnapshot) => {
-  //     const childKey = childSnapshot.key;
-  //     const childData: Message = childSnapshot.val();
-  //     result.unshift({ ...childData, id: childKey as string });
-  //   });
+    snapshots.forEach((childSnapshot) => {
+      const childKey = childSnapshot.key;
+      const childData: Message = childSnapshot.val();
+      result.unshift({ ...childData, id: childKey as string });
+    });
     
-  //   return result;
-  // },
+    return result;
+  },
 
-  getAll(messageingListId: string, onNewMessage: (message: Message)=> void, onError: (error: Error) => void) {
+  getCreate(messageingListId: string, onNewMessage: (message: Message)=> void, onError: (error: Error) => void) {
     const db = getDatabase();
     return onChildAdded(
       ref(db, `messages/${messageingListId}`), 

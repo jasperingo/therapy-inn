@@ -4,7 +4,6 @@ import ERRORS from "../assets/values/errors";
 import Message from "../models/Message";
 import MessageRepository from "../repositories/MessageRepository";
 import { Unsubscribe } from "firebase/auth";
-import { useNetworkDetect } from "./utilHook";
 
 
 export const useMessageCreate = (hasId: boolean) => {
@@ -12,31 +11,37 @@ export const useMessageCreate = (hasId: boolean) => {
   const [done, setDone] = useState(hasId);
   const [loading, setLoading] = useState(false);
 
-  return async (message: Message, messagingListId?: string) => {
+  return useCallback(
+    async (message: Message, messagingListId?: string) => {
     
-    if (loading || done) return;
-    
-    setLoading(true);
+      if (loading || done) return;
+      
+      setLoading(true);
 
-    try {
-      const messageId = await MessageRepository.create(message, messagingListId);
+      try {
+        const messageId = await MessageRepository.create(message, messagingListId);
 
-      setDone(true);
+        setDone(true);
 
-      return messageId;
+        return messageId;
 
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [done, loading]
+  );
 }
 
 
 type ListReturnType = [
-  (messagingListId: string)=> Unsubscribe | undefined,
+  (messagingListId: string) => Promise<void>,
+  (messagingListId: string, userId: string)=> Unsubscribe | undefined,
+  (error: string) => void,
   Array<Message>, 
+  boolean,
   boolean,
   string | null, 
   (message: Message)=> void,
@@ -46,9 +51,9 @@ type ListReturnType = [
 
 export const useMessageList = (): ListReturnType => {
 
-  const connected = useNetworkDetect();
-
   const [list, setList] = useState<Array<Message>>([]);
+
+  const [loaded, setLoaded] = useState(false);
 
   const [loading, setLoading] = useState(false);
 
@@ -56,58 +61,58 @@ export const useMessageList = (): ListReturnType => {
   
   const retryFetch = useCallback(()=> setError(null), []);
 
-  const fetch = useCallback(
-    (messagingListId: string)=> {
+  const setPageError = useCallback(
+    (error: string)=> {
+      setError(error);
+      setLoading(false);
+    },
+    []
+  );
 
-      if (!connected) {
-        setError(ERRORS.noInternetConnection);
-        return;
-      }
+  const fetchMessages = useCallback(
+    async (messagingListId: string)=> {
 
       setLoading(true);
-
       setError(null);
       
-      return MessageRepository.getAll(
-        messagingListId,
-        (message)=> {
-          setLoading(false);
-          setList((old)=> {
-            if (old.find(i=> i.id === message.id) !== undefined) {
-              return [...old];
-            } else if (old[0] === undefined || old[0].date < message.date) {
-              return [message, ...old];
-            } else {
-              return [...old, message];
-            }
-          });
-        },
-        (error) => {
-          console.log(error);
-          setLoading(false);
-          if (error instanceof FirebaseError)
-            setError(error.code);
-          else 
-            setError(ERRORS.unknown);
-        }
-      );
+      try {
+        const response = await MessageRepository.getList(messagingListId);
+        
+        setLoaded(true);
+        setLoading(false);
+        setList(response);
+        
+      } catch (error) {
+        console.log(error);
+        setPageError(error instanceof FirebaseError ? error.code : ERRORS.unknown);
+      }
     },
-    [connected]
+    [setPageError]
   );
 
-  const onNewMessage = useCallback(
-    (message: Message) => setList((oldList)=> [message, ...oldList]), []
+  const fetchNewMessages = useCallback(
+    (messagingListId: string, userId: string)=> MessageRepository.getCreate(
+      messagingListId,
+      (message)=> setList((old)=> (message.senderId === userId || old.find(i=> i.id === message.id) !== undefined) ? old : [message, ...old]),
+      (error) => console.log(error)
+    ),
+    []
   );
+
+  const onNewMessage = (message: Message) => setList((oldList)=> [message, ...oldList]);
   
-  const onMessageSent = (index: number, id: string) => setList(
-    list.map((item, i)=> {
-      if (i === index) {
-        item.id = id;
-      }
-      return item;
-    })
-  );
+  const onMessageSent = (index: number, id: string) => setList((old)=> old.map((item, i)=> (i === index) ? ({ ...item, id }) : item));
   
-  
-  return [fetch, list, loading, error, onNewMessage, onMessageSent, retryFetch];
+  return [
+    fetchMessages, 
+    fetchNewMessages, 
+    setPageError, 
+    list, 
+    loading, 
+    loaded, 
+    error, 
+    onNewMessage, 
+    onMessageSent, 
+    retryFetch
+  ];
 }

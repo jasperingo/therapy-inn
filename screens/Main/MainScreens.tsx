@@ -10,7 +10,6 @@ import { useTranslation } from 'react-i18next';
 import ProfileScreen from './ProfileScreen';
 import GetHelpScreen from './GetHelpScreen';
 
-
 const Tab = createBottomTabNavigator();
 
 export type MainTabParamList = {
@@ -57,9 +56,20 @@ const MainScreens = () => {
           height: 60
         },
         headerTitleStyle: {
+          fontFamily: 'SecularOne-Regular',
           fontSize: AppDimensions.xLarge
         },
-        headerTintColor: AppColors.colorOnPrimary
+        headerTintColor: AppColors.colorOnPrimary,
+        headerLeft: ()=> (
+          <Ionicons 
+            name="medkit-outline" 
+            size={AppDimensions.xxLarge}
+            color={AppColors.colorOnPrimary} 
+            style={{
+              marginLeft: AppDimensions.medium
+            }}
+            />
+        )
       })}
       >
       <Tab.Screen name="Articles" component={ArticlesScreen} options={{ title: t('App_name'), tabBarLabel: t('Articles') }} />

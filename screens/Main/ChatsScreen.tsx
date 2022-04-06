@@ -15,6 +15,8 @@ import { useRenderListFooter } from '../../hooks/utilHook';
 import Loading from '../../components/Loading';
 import LoadingError from '../../components/LoadingError';
 import LoadingEmpty from '../../components/LoadingEmpty';
+import ERRORS from '../../assets/values/errors';
+import { useNetInfo } from '@react-native-community/netinfo';
 
 const styles = StyleSheet.create({
 
@@ -38,10 +40,13 @@ const ChatsScreen = () => {
 
   const chatReadUpdater = useChatReadUpdate();
 
+  const network = useNetInfo();
+
   const [
-    fetch,
-    fetchUpdate,
-    checkExists,
+    fetchChats,
+    fetchNewChats,
+    fetchUpdatedChats,
+    setError,
     list, 
     loading, 
     loaded,
@@ -53,26 +58,33 @@ const ChatsScreen = () => {
 
   useEffect(
     ()=> {
-      if (user !== null) {
-        checkExists(user.id);
-        return fetch(user.id);
-      }
+      if (user !== null && !network.isConnected && !loaded && error === null)
+        setError(ERRORS.noInternetConnection);
+      else if (user !== null && network.isConnected && !loaded && !loading) 
+        fetchChats(user.id);
     },
-    [user, refreshing, error, checkExists, fetch]
+    [user, network.isConnected, loaded, loading, error, fetchChats, setError]
   );
   
   useEffect(
     ()=> {
-      if (user !== null && loaded)
-        return fetchUpdate(user.id);
-    },
-    [user, loaded, fetchUpdate]
-  );
+      if (user === null || !loaded) return;
+      
+      const unsubscribeNew = fetchNewChats(user.id);
+      const unsubscribeUpdate = fetchUpdatedChats(user.id);
 
+      return ()=> {
+        unsubscribeNew();
+        unsubscribeUpdate();
+      }
+    },
+    [user, loaded, fetchNewChats, fetchUpdatedChats]
+  );
+  
   if (user === null) {
     return <AuthNow onClick={()=> navigation.navigate('Auth', { screen: 'PhoneNumber' })} />;
   }
-
+  
   return (
     <View>
       

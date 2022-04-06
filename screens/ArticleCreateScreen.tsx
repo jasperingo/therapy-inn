@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from 'react-native';
-import NetInfo from '@react-native-community/netinfo';
 import validator from 'validator';
 import AppDimensions from '../assets/values/dimensions';
 import UIButton from '../components/UIButton';
@@ -14,6 +13,7 @@ import { useErrorMessage } from '../hooks/errorHook';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
+import { useNetInfo } from '@react-native-community/netinfo';
 
 const styles = StyleSheet.create({
   container: {
@@ -34,6 +34,8 @@ const ArticleCreateScreen = () => {
   const photoURIToBlob = usePhotoURIToBlob();
 
   const errorMessage = useErrorMessage();
+
+  const network = useNetInfo();
 
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'ArticleCreate'>>();
 
@@ -99,15 +101,14 @@ const ArticleCreateScreen = () => {
       setPhotoError('');
     }
 
-    if (!error) {
-      NetInfo.fetch().then(state => {
-        if (!state.isConnected) {
-          alert(t('No_network_connection'));
-        } else {
-          onSubmit(title, link, photo as Blob);
-        }
-      });
+    if (error) return;
+
+    if (!network.isConnected) {
+      alert(t('No_network_connection'));
+      return;
     }
+
+    onSubmit(title, link, photo as Blob);
   }
 
   const onPickPhoto = async (result: string) => {

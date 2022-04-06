@@ -16,6 +16,7 @@ import MessagesScreen from './screens/MessagesScreen';
 import ArticleCreateScreen from './screens/ArticleCreateScreen';
 import AppDimensions from './assets/values/dimensions';
 import MessageReducer from './context/MessageReducer';
+import { useFonts } from 'expo-font';
 
 LogBox.ignoreLogs(['Setting a timer for a long period of time'])
 
@@ -52,6 +53,12 @@ const App = ()=> {
   const [articles, articleDispatch] = useReducer(ArticleReducer, articlestate);
 
   const [message, messageDispatch] = useReducer(MessageReducer, '');
+
+  const [fontLoaded] = useFonts({
+    'SecularOne-Regular': require('./assets/fonts/SecularOne-Regular.ttf')
+  });
+
+  if (!fontLoaded) return null;
 
   return (
     <AppContext.Provider value={{
