@@ -1,5 +1,3 @@
-import { useEffect, useState } from "react";
-import NetInfo from "@react-native-community/netinfo";
 
 export const useRenderListFooter = ()=> {
 
@@ -10,21 +8,4 @@ export const useRenderListFooter = ()=> {
       }
     }
   }
-}
-
-
-export const useNetworkDetect = ()=> {
-
-  const [connected, setConnected] = useState(false);
-
-  useEffect(
-    ()=> {
-      return NetInfo.addEventListener((state)=> {
-        setConnected(state.isConnected ?? false);
-      });
-    },
-    []
-  );
-
-  return connected;
 }
